@@ -4,8 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import logo from "./logo.svg";
 import reactLogo from "./react.svg";
+import use2048 from "./hooks/use2048";
+import MergeGame from "./components/merge-game";
 
 export function App() {
+  use2048();
   return (
     <div className="container mx-auto p-8 text-center relative z-10">
       <div className="flex justify-center items-center gap-8 mb-8">
@@ -22,8 +25,8 @@ export function App() {
       </div>
 
       <Card className="bg-card/50 backdrop-blur-sm border-muted">
-        <CardContent className="pt-6">
-          <h1 className="text-5xl font-bold my-4 leading-tight">Bun + React</h1>
+        {/* 
+        <CardContent className="pt-6"><h1 className="text-5xl font-bold my-4 leading-tight">Bun + React</h1>
           <p>
             Edit{" "}
             <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
@@ -31,8 +34,9 @@ export function App() {
             </code>{" "}
             and save to test HMR
           </p>
-          <APITester />
-        </CardContent>
+          <APITester /> 
+        </CardContent>*/}
+        <MergeGame />
       </Card>
     </div>
   );
