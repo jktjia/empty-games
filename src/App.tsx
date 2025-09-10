@@ -1,45 +1,19 @@
-import "./index.css";
-import { APITester } from "./APITester";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from './components/ui/card'
+import EmptyProvider from './contexts/empty-provider'
+import MergeGame from './components/merge-game'
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
-import use2048 from "./hooks/use2048";
-import MergeGame from "./components/merge-game";
-
-export function App() {
-  use2048();
+function App() {
   return (
-    <div className="container mx-auto p-8 text-center relative z-10">
-      <div className="flex justify-center items-center gap-8 mb-8">
-        <img
-          src={logo}
-          alt="Bun Logo"
-          className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#646cffaa] scale-120"
-        />
-        <img
-          src={reactLogo}
-          alt="React Logo"
-          className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] [animation:spin_20s_linear_infinite]"
-        />
-      </div>
-
-      <Card className="bg-card/50 backdrop-blur-sm border-muted">
-        {/* 
-        <CardContent className="pt-6"><h1 className="text-5xl font-bold my-4 leading-tight">Bun + React</h1>
-          <p>
-            Edit{" "}
-            <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-              src/App.tsx
-            </code>{" "}
-            and save to test HMR
-          </p>
-          <APITester /> 
-        </CardContent>*/}
-        <MergeGame />
-      </Card>
+    <div className="text-center w-full h-screen">
+      <EmptyProvider>
+        <div className="container mx-auto p-8 text-center relative z-10 max-w-xl h-full justify-center items-center flex">
+          <Card className="bg-card/50 backdrop-blur-sm border-muted w-full h-fit">
+            <MergeGame />
+          </Card>
+        </div>
+      </EmptyProvider>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

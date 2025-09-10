@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-export default function use2048() {
+export default function useMergeGame() {
     const [tiles, setTiles] = useState<number[][]>(initTiles())
     const [turns, setTurns] = useState<number>(0)
     const [score, setScore] = useState<number>(0)
@@ -13,9 +13,6 @@ export default function use2048() {
         gameOver = gameOver && sameTiles(tiles, slideRight(tiles)[0])
         return gameOver
     }, [tiles])
-
-    useEffect(() => console.log(turns), [turns])
-    useEffect(() => console.log(tiles), [tiles])
 
     const up = () => {
         const [newTiles, score] = slideUp(tiles)
@@ -51,6 +48,8 @@ export default function use2048() {
         setScore(0)
     }, [setTiles, setTurns, setScore])
 
+    useEffect(() => console.log(turns), [turns])
+
     return { tiles, score, up, down, left, right, isGameOver, restart }
 }
 
@@ -68,7 +67,7 @@ function sameTiles(t1: number[][], t2: number[][]): boolean {
 }
 
 function makeBaseTiles(n: number = 4): number[][] {
-    const baseTiles = []
+    const baseTiles: number[][] = []
     for (var i = 0; i < n; i++) {
         baseTiles[i] = []
         for (let j = 0; j < n; j++) {
