@@ -5,6 +5,7 @@ import useMinesweeper from '@/hooks/use-minesweeper'
 import { Bomb, FlagTriangleRight, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { MineTileState } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 const tileColors = [
   //   'bg-[#3c1c4a]',
@@ -79,15 +80,21 @@ export default function Minesweeper() {
             {tiles.flatMap((r, i) =>
               r.map((t, idx) => {
                 var className =
-                  'rounded flex items-center justify-center aspect-square p-0 m-0 min-w-0 min-h-0 overflow-clip '
+                  'rounded flex items-center justify-center aspect-square p-0 m-0 overflow-clip '
                 var content: ReactNode = <></>
                 if (t == MineTileState.NOT_SEEN || !mines) {
-                  className += ' bg-muted-foreground opacity-50 shadow-lg'
+                  className = cn(
+                    className,
+                    'bg-muted-foreground opacity-50 shadow-lg',
+                  )
                   if (isGameLost() && mines && mines[i][idx] == -1) {
                     content = <Bomb className="text-accent max-w-full" />
                   }
                 } else if (t == MineTileState.FLAG) {
-                  className += ' bg-muted-foreground opacity-50 shadow-lg'
+                  className = cn(
+                    className,
+                    'bg-muted-foreground opacity-50 shadow-lg',
+                  )
                   if (isGameLost() && mines && mines[i][idx] != -1) {
                     content = <X className="text-accent max-w-full" />
                   } else {
@@ -96,11 +103,13 @@ export default function Minesweeper() {
                     )
                   }
                 } else {
-                  className +=
-                    ' text-black disabled:opacity-100 ' +
-                    (mines[i][idx] == 0
+                  className = cn(
+                    className,
+                    'text-black disabled:opacity-100',
+                    mines[i][idx] == 0
                       ? 'bg-background'
-                      : tileColors[mines[i][idx] - 1])
+                      : tileColors[mines[i][idx] - 1],
+                  )
                   if (mines[i][idx] > 0) {
                     content = mines[i][idx]
                   }

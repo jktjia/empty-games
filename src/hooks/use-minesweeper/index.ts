@@ -1,5 +1,5 @@
 import { MineTileState } from "@/lib/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { initMines, initTiles, revealTile } from "./helpers";
 
 export default function useMinesweeper({
@@ -20,7 +20,8 @@ export default function useMinesweeper({
         setMines(undefined)
         setTiles(initTiles(width, height))
         setGameLost(false)
-    }, [setMines, setTiles])
+        console.log(turns)
+    }, [setMines, setTiles, setGameLost, turns])
 
     const flag = useCallback((x: number, y: number) => {
         if (mines) {
@@ -46,8 +47,6 @@ export default function useMinesweeper({
             setTurns(t => t + 1)
         }
     }, [height, width, mines, tiles, setGameLost, setTurns])
-
-    useEffect(() => console.log(turns), [turns])
 
     const remaining = useCallback(() => {
         return mineCount - tiles.flatMap(t => t).filter(t => t == MineTileState.FLAG).length

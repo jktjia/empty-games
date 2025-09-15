@@ -1,61 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-
-export default function useMergeGame() {
-    const [tiles, setTiles] = useState<number[][]>(initTiles())
-    const [turns, setTurns] = useState<number>(0)
-    const [score, setScore] = useState<number>(0)
-
-    const isGameOver = useMemo(() => {
-        var gameOver = emptyTiles(tiles) == 0
-        gameOver = gameOver && sameTiles(tiles, slideUp(tiles)[0])
-        gameOver = gameOver && sameTiles(tiles, slideDown(tiles)[0])
-        gameOver = gameOver && sameTiles(tiles, slideLeft(tiles)[0])
-        gameOver = gameOver && sameTiles(tiles, slideRight(tiles)[0])
-        return gameOver
-    }, [tiles])
-
-    const up = () => {
-        const [newTiles, score] = slideUp(tiles)
-        setScore(s => s + score)
-        setTurns(t => !sameTiles(tiles, newTiles) ? t + 1 : t)
-        setTiles(t => !sameTiles(t, newTiles) ? addNewTile(newTiles) : t)
-    }
-
-    const down = () => {
-        const [newTiles, score] = slideDown(tiles)
-        setScore(s => s + score)
-        setTurns(t => !sameTiles(tiles, newTiles) ? t + 1 : t)
-        setTiles(t => !sameTiles(t, newTiles) ? addNewTile(newTiles) : t)
-    }
-
-    const left = () => {
-        const [newTiles, score] = slideLeft(tiles)
-        setScore(s => s + score)
-        setTurns(t => !sameTiles(tiles, newTiles) ? t + 1 : t)
-        setTiles(t => !sameTiles(t, newTiles) ? addNewTile(newTiles) : t)
-    }
-
-    const right = () => {
-        const [newTiles, score] = slideRight(tiles)
-        setScore(s => s + score)
-        setTurns(t => !sameTiles(tiles, newTiles) ? t + 1 : t)
-        setTiles(t => !sameTiles(t, newTiles) ? addNewTile(newTiles) : t)
-    }
-
-    const restart = useCallback(() => {
-        setTiles(initTiles())
-        setScore(0)
-    }, [setTiles, setScore])
-
-    useEffect(() => console.log(turns), [turns])
-
-    return { tiles, score, up, down, left, right, isGameOver, restart }
-}
-
 export function sameTiles(t1: number[][], t2: number[][]): boolean {
-    if (!validTiles(t1) || !validTiles(t2)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(t1) || !validTiles(t2)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     var same = true
     for (var i = 0; i < t1.length; i++) {
         for (let j = 0; j < t1[i].length; j++) {
@@ -77,9 +23,9 @@ function makeBaseTiles(n: number = 4): number[][] {
 }
 
 export function slideUp(tiles: number[][]): [number[][], number] {
-    if (!validTiles(tiles)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(tiles)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     const updated = makeBaseTiles()
     var score = 0
     for (var i = 0; i < 4; i++) {
@@ -94,9 +40,9 @@ export function slideUp(tiles: number[][]): [number[][], number] {
 }
 
 export function slideDown(tiles: number[][]): [number[][], number] {
-    if (!validTiles(tiles)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(tiles)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     const updated = makeBaseTiles()
     var score = 0
     for (var i = 0; i < 4; i++) {
@@ -111,9 +57,9 @@ export function slideDown(tiles: number[][]): [number[][], number] {
 }
 
 export function slideLeft(tiles: number[][]): [number[][], number] {
-    if (!validTiles(tiles)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(tiles)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     const updated = makeBaseTiles()
     var score = 0
     for (var i = 0; i < 4; i++) {
@@ -128,9 +74,9 @@ export function slideLeft(tiles: number[][]): [number[][], number] {
 }
 
 export function slideRight(tiles: number[][]): [number[][], number] {
-    if (!validTiles(tiles)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(tiles)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     const updated = makeBaseTiles()
     var score = 0
     for (var i = 0; i < 4; i++) {
@@ -171,9 +117,9 @@ export function initTiles(): number[][] {
 }
 
 export function addNewTile(tiles: number[][]): number[][] {
-    if (!validTiles(tiles)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(tiles)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     const newTile = Math.floor(Math.random() * emptyTiles(tiles))
     const newVal = Math.floor(Math.random() * 5) == 0 ? 4 : 2
     const updated: number[][] = []
@@ -194,13 +140,12 @@ export function addNewTile(tiles: number[][]): number[][] {
 }
 
 export function emptyTiles(tiles: number[][]): number {
-    if (!validTiles(tiles)) {
-        throw new Error('invalid 2048 tiles')
-    }
+    // if (!validTiles(tiles)) {
+    //     throw new Error('invalid 2048 tiles')
+    // }
     return tiles.flatMap(r => r.map(v => v == 0)).filter(v => v).length
 }
 
-function validTiles(tiles: number[][]): boolean {
-    return tiles.length == 4 && tiles.every(r => r.length == 4)
-
-}
+// function validTiles(tiles: number[][]): boolean {
+//     return tiles.length == 4 && tiles.every(r => r.length == 4)
+// }
