@@ -33,19 +33,19 @@ export default function Minesweeper() {
     reveal,
     flag,
     isGameLost,
-    isGameWon,
     isGameOver,
     restart,
     remaining,
-  } = useMinesweeper()
+  } = useMinesweeper({})
 
   const handleClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     x: number,
     y: number,
   ) => {
-    if (!isGameOver) {
+    if (!isGameOver()) {
       e.preventDefault()
+      console.log(e.button, x, y)
       if (e.button === 0) {
         reveal(x, y)
       } else if (e.button === 2) {
@@ -73,7 +73,7 @@ export default function Minesweeper() {
         <div className="relative w-fit">
           <div
             className={`grid grid-cols-30 gap-1 transition-all text-xl p-2${
-              isGameLost || isGameWon ? ' opacity-50' : ''
+              isGameOver() ? ' opacity-50' : ''
             }`}
           >
             {tiles.flatMap((r, i) =>
@@ -83,12 +83,12 @@ export default function Minesweeper() {
                 var content: ReactNode = <></>
                 if (t == MineTileState.NOT_SEEN || !mines) {
                   className += ' bg-muted-foreground opacity-50 shadow-lg'
-                  if (isGameLost && mines && mines[i][idx] == -1) {
+                  if (isGameLost() && mines && mines[i][idx] == -1) {
                     content = <Bomb className="text-accent max-w-full" />
                   }
                 } else if (t == MineTileState.FLAG) {
                   className += ' bg-muted-foreground opacity-50 shadow-lg'
-                  if (isGameLost && mines && mines[i][idx] != -1) {
+                  if (isGameLost() && mines && mines[i][idx] != -1) {
                     content = <X className="text-accent max-w-full" />
                   } else {
                     content = (
@@ -111,7 +111,7 @@ export default function Minesweeper() {
                     key={'tile-' + i + '-' + idx}
                     onClick={(e) => handleClick(e, idx, i)}
                     onContextMenu={(e) => handleClick(e, idx, i)}
-                    disabled={t == MineTileState.SEEN && !isGameOver}
+                    disabled={t == MineTileState.SEEN && !isGameOver()}
                   >
                     {content}
                   </Button>
@@ -119,10 +119,10 @@ export default function Minesweeper() {
               }),
             )}
           </div>
-          {isGameOver && (
+          {isGameOver() && (
             <div className="absolute bottom-1/2 w-full flex justify-center text-3xl font-semibold">
               <div className="w-fit bg-background rounded p-2 opacity-75">
-                {isGameLost ? 'You Lost!' : 'You Won!'}
+                {isGameLost() ? 'You Lost!' : 'You Won!'}
               </div>
             </div>
           )}
