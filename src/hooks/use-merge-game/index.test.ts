@@ -1,8 +1,8 @@
 
 import { act, renderHook } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
-import useMergeGame from ".";
 import * as helperMod from './helpers'
+import useMergeGame from ".";
 
 test('init tiles', () => {
     const { result } = renderHook(() => useMergeGame())

@@ -7,7 +7,7 @@ export default function useMergeGame() {
     const [score, setScore] = useState<number>(0)
 
     const isGameOver = useMemo(() => {
-        var gameOver = emptyTiles(tiles) == 0
+        let gameOver = emptyTiles(tiles) == 0
         gameOver = gameOver && sameTiles(tiles, slideUp(tiles)[0])
         gameOver = gameOver && sameTiles(tiles, slideDown(tiles)[0])
         gameOver = gameOver && sameTiles(tiles, slideLeft(tiles)[0])
@@ -15,8 +15,8 @@ export default function useMergeGame() {
         return gameOver
     }, [tiles])
 
-    const update = useCallback((newTiles: number[][], score: number) => {
-        setScore(s => s + score)
+    const update = useCallback((newTiles: number[][], s: number) => {
+        setScore(old => old + s)
         setTiles(t => {
             setTurns(n => !sameTiles(t, newTiles) ? n + 1 : n)
             return !sameTiles(t, newTiles) ? addNewTile(newTiles) : t
@@ -24,23 +24,23 @@ export default function useMergeGame() {
     }, [setScore, setTurns, setTiles])
 
     const up = () => {
-        const [newTiles, score] = slideUp(tiles)
-        update(newTiles, score)
+        const [newTiles, s] = slideUp(tiles)
+        update(newTiles, s)
     }
 
     const down = () => {
-        const [newTiles, score] = slideDown(tiles)
-        update(newTiles, score)
+        const [newTiles, s] = slideDown(tiles)
+        update(newTiles, s)
     }
 
     const left = () => {
-        const [newTiles, score] = slideLeft(tiles)
-        update(newTiles, score)
+        const [newTiles, s] = slideLeft(tiles)
+        update(newTiles, s)
     }
 
     const right = () => {
-        const [newTiles, score] = slideRight(tiles)
-        update(newTiles, score)
+        const [newTiles, s] = slideRight(tiles)
+        update(newTiles, s)
     }
 
     const restart = useCallback(() => {

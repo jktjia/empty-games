@@ -2,7 +2,7 @@ import { MineTileState } from "@/lib/types"
 
 export function revealTile(x: number, y: number, height: number, width: number, mines: number[][], tiles: MineTileState[][]): boolean {
     const current = tiles[y][x]
-    var isGameOver = false
+    let isGameOver = false
     if (current == MineTileState.NOT_SEEN) {
         tiles[y][x] = MineTileState.SEEN
         if (mines[y][x] == -1) {
@@ -48,7 +48,7 @@ export function initMines(initX: number, initY: number, width: number, height: n
         throw new Error('invalid initial click')
     }
 
-    var initInvalid = 9
+    let initInvalid = 9
     const edgeY = initY == 0 || initY == height - 1
     const edgeX = initX == 0 || initX == width - 1
     if (edgeX && edgeY) {
@@ -57,10 +57,10 @@ export function initMines(initX: number, initY: number, width: number, height: n
         initInvalid = 6
     }
     const mineLocations: number[] = []
-    for (var n = 0; n < count; n++) {
-        var loc = Math.floor(Math.random() * (width * height - initInvalid - n))
-        var locX = loc % width
-        var locY = Math.floor(loc / width)
+    for (let n = 0; n < count; n++) {
+        let loc = Math.floor(Math.random() * (width * height - initInvalid - n))
+        let locX = loc % width
+        let locY = Math.floor(loc / width)
         while ((locY <= initY + 1 && locY >= initY - 1 && locX <= initX + 1 && locX >= initX - 1) || mineLocations.includes(loc)) {
             loc++
             locX = loc % width
@@ -70,9 +70,9 @@ export function initMines(initX: number, initY: number, width: number, height: n
     }
 
     const mines: number[][] = []
-    for (var i = 0; i < height; i++) {
+    for (let i = 0; i < height; i++) {
         mines[i] = []
-        for (var j = 0; j < width; j++) {
+        for (let j = 0; j < width; j++) {
             if (mineLocations.includes(i * width + j)) {
                 mines[i].push(-1)
                 if (j > 0 && mines[i][j - 1] != -1) {
@@ -110,9 +110,9 @@ export function initMines(initX: number, initY: number, width: number, height: n
 
 export function initTiles(width: number, height: number) {
     const tiles: MineTileState[][] = []
-    for (var i = 0; i < height; i++) {
+    for (let i = 0; i < height; i++) {
         tiles[i] = []
-        for (var j = 0; j < width; j++) {
+        for (let j = 0; j < width; j++) {
             tiles[i].push(MineTileState.NOT_SEEN)
         }
     }

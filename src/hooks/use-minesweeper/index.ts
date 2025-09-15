@@ -1,6 +1,6 @@
-import { MineTileState } from "@/lib/types";
 import { useCallback, useState } from "react";
 import { initMines, initTiles, revealTile } from "./helpers";
+import { MineTileState } from "@/lib/types";
 
 export default function useMinesweeper({
     width = 30,
@@ -57,7 +57,7 @@ export default function useMinesweeper({
     }, [gameLost])
 
     const isGameWon = useCallback(() => {
-        var gameWon = remaining() == 0
+        let gameWon = remaining() == 0
         gameWon = gameWon && tiles.flatMap(t => t).filter(t => t == MineTileState.NOT_SEEN).length == 0
         return gameWon
     }, [remaining, tiles])

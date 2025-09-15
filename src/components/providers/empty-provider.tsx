@@ -1,5 +1,6 @@
+import { createContext } from 'react'
+import type { ReactNode } from 'react'
 import { useEmptyProvider } from '@/hooks/use-empty-context'
-import { createContext, type ReactNode } from 'react'
 
 interface EmptyContextType {
   title: string

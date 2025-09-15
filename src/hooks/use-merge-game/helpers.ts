@@ -2,8 +2,8 @@ export function sameTiles(t1: number[][], t2: number[][]): boolean {
     // if (!validTiles(t1) || !validTiles(t2)) {
     //     throw new Error('invalid 2048 tiles')
     // }
-    var same = true
-    for (var i = 0; i < t1.length; i++) {
+    let same = true
+    for (let i = 0; i < t1.length; i++) {
         for (let j = 0; j < t1[i].length; j++) {
             same = same && t1[i][j] == t2[i][j]
         }
@@ -13,7 +13,7 @@ export function sameTiles(t1: number[][], t2: number[][]): boolean {
 
 function makeBaseTiles(n: number = 4): number[][] {
     const baseTiles: number[][] = []
-    for (var i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
         baseTiles[i] = []
         for (let j = 0; j < n; j++) {
             baseTiles[i][j] = 0
@@ -27,12 +27,12 @@ export function slideUp(tiles: number[][]): [number[][], number] {
     //     throw new Error('invalid 2048 tiles')
     // }
     const updated = makeBaseTiles()
-    var score = 0
-    for (var i = 0; i < 4; i++) {
+    let score = 0
+    for (let i = 0; i < 4; i++) {
         const onlyVals = tiles.map(r => r[i]).filter(v => v != 0)
         const [newCol, colScore] = mergeValues(onlyVals)
         score += colScore
-        for (var n = 0; n < newCol.length; n++) {
+        for (let n = 0; n < newCol.length; n++) {
             updated[n][i] = newCol[n]
         }
     }
@@ -44,12 +44,12 @@ export function slideDown(tiles: number[][]): [number[][], number] {
     //     throw new Error('invalid 2048 tiles')
     // }
     const updated = makeBaseTiles()
-    var score = 0
-    for (var i = 0; i < 4; i++) {
+    let score = 0
+    for (let i = 0; i < 4; i++) {
         const onlyVals = tiles.map(r => r[i]).filter(v => v != 0)
         const [newCol, colScore] = mergeValues(onlyVals)
         score += colScore
-        for (var n = 0; n < newCol.length; n++) {
+        for (let n = 0; n < newCol.length; n++) {
             updated[updated.length - 1 - n][i] = newCol[newCol.length - 1 - n]
         }
     }
@@ -61,12 +61,12 @@ export function slideLeft(tiles: number[][]): [number[][], number] {
     //     throw new Error('invalid 2048 tiles')
     // }
     const updated = makeBaseTiles()
-    var score = 0
-    for (var i = 0; i < 4; i++) {
+    let score = 0
+    for (let i = 0; i < 4; i++) {
         const onlyVals = tiles[i].filter(v => v != 0)
         const [newCol, colScore] = mergeValues(onlyVals)
         score += colScore
-        for (var n = 0; n < newCol.length; n++) {
+        for (let n = 0; n < newCol.length; n++) {
             updated[i][n] = newCol[n]
         }
     }
@@ -78,12 +78,12 @@ export function slideRight(tiles: number[][]): [number[][], number] {
     //     throw new Error('invalid 2048 tiles')
     // }
     const updated = makeBaseTiles()
-    var score = 0
-    for (var i = 0; i < 4; i++) {
+    let score = 0
+    for (let i = 0; i < 4; i++) {
         const onlyVals = tiles[i].filter(v => v != 0)
         const [newCol, colScore] = mergeValues(onlyVals)
         score += colScore
-        for (var n = 0; n < newCol.length; n++) {
+        for (let n = 0; n < newCol.length; n++) {
             updated[i][updated.length - 1 - n] = newCol[newCol.length - 1 - n]
         }
     }
@@ -92,9 +92,9 @@ export function slideRight(tiles: number[][]): [number[][], number] {
 
 export function mergeValues(vals: number[]): [number[], number] {
     const merged = []
-    var score = 0
-    var justMerged = false;
-    for (var j = 0; j < vals.length; j++) {
+    let score = 0
+    let justMerged = false;
+    for (let j = 0; j < vals.length; j++) {
         if (justMerged) {
             justMerged = false
             continue
@@ -124,7 +124,7 @@ export function addNewTile(tiles: number[][]): number[][] {
     const newVal = Math.floor(Math.random() * 5) == 0 ? 4 : 2
     const updated: number[][] = []
     let currEmpty = 0
-    for (var i = 0; i < tiles.length; i++) {
+    for (let i = 0; i < tiles.length; i++) {
         updated[i] = []
         for (let j = 0; j < tiles[i].length; j++) {
             const oldVal = tiles[i][j]

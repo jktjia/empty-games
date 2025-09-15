@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/card'
 import { Outlet } from '@tanstack/react-router'
+import { Card } from '@/components/ui/card'
 
 export default function GameLayout() {
   return (

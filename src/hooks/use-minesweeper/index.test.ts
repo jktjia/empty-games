@@ -1,8 +1,8 @@
-import { MineTileState } from "@/lib/types"
 import { expect, test, vi } from "vitest"
 import { act, renderHook } from '@testing-library/react'
-import useMinesweeper from "."
 import * as helperMod from './helpers'
+import useMinesweeper from "."
+import { MineTileState } from "@/lib/types"
 
 test('mine init', () => {
     const width = 8

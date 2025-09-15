@@ -1,9 +1,9 @@
+import { Bomb, FlagTriangleRight, X } from 'lucide-react'
 import { CardContent, CardHeader } from '../components/ui/card'
 import { Button } from '../components/ui/button'
+import type { ReactNode } from 'react'
 import useEmptyContext from '@/hooks/use-empty-context'
 import useMinesweeper from '@/hooks/use-minesweeper'
-import { Bomb, FlagTriangleRight, X } from 'lucide-react'
-import type { ReactNode } from 'react'
 import { MineTileState } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -79,9 +79,9 @@ export default function Minesweeper() {
           >
             {tiles.flatMap((r, i) =>
               r.map((t, idx) => {
-                var className =
+                let className =
                   'rounded flex items-center justify-center aspect-square p-0 m-0 overflow-clip '
-                var content: ReactNode = <></>
+                let content: ReactNode = <></>
                 if (t == MineTileState.NOT_SEEN || !mines) {
                   className = cn(
                     className,
@@ -95,7 +95,7 @@ export default function Minesweeper() {
                     className,
                     'bg-muted-foreground opacity-50 shadow-lg',
                   )
-                  if (isGameLost() && mines && mines[i][idx] != -1) {
+                  if (isGameLost() && mines[i][idx] != -1) {
                     content = <X className="text-accent max-w-full" />
                   } else {
                     content = (

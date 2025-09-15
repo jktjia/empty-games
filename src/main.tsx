@@ -8,9 +8,9 @@ import {
 } from '@tanstack/react-router'
 
 import './styles.css'
+import { Toaster } from 'sonner'
 import reportWebVitals from './reportWebVitals.ts'
 
-import { Toaster } from 'sonner'
 import BaseLayout from './layouts/base-layout.tsx'
 import GameLayout from './layouts/game-layout.tsx'
 import MergeGame from './pages/merge-game.tsx'
@@ -49,6 +49,7 @@ const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
+  basepath: 'empty-games',
 })
 
 declare module '@tanstack/react-router' {

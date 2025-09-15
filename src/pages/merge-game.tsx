@@ -1,7 +1,7 @@
-import useMergeGame from '@/hooks/use-merge-game'
+import { useCallback } from 'react'
 import { CardContent, CardHeader } from '../components/ui/card'
 import { Button } from '../components/ui/button'
-import { useCallback } from 'react'
+import useMergeGame from '@/hooks/use-merge-game'
 import useEmptyContext from '@/hooks/use-empty-context'
 
 const gradient = [
@@ -41,7 +41,7 @@ export default function MergeGame() {
     updateActivity()
   }
 
-  const refFocus = useCallback((inputElement: HTMLDivElement) => {
+  const refFocus = useCallback((inputElement: HTMLDivElement | null) => {
     if (inputElement) {
       inputElement.focus()
     }
