@@ -1,4 +1,3 @@
-// editor-provider.tsx
 import { useEmptyProvider } from '@/hooks/use-empty-context'
 import { createContext, type ReactNode } from 'react'
 

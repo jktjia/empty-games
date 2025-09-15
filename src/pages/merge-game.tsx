@@ -1,6 +1,6 @@
 import useMergeGame from '@/hooks/use-merge-game'
-import { CardContent, CardHeader } from './ui/card'
-import { Button } from './ui/button'
+import { CardContent, CardHeader } from '../components/ui/card'
+import { Button } from '../components/ui/button'
 import { useCallback } from 'react'
 import useEmptyContext from '@/hooks/use-empty-context'
 
@@ -29,7 +29,6 @@ export default function MergeGame() {
     useMergeGame()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log(e.key)
     if (e.key === 'ArrowUp') {
       up()
     } else if (e.key === 'ArrowDown') {
@@ -70,23 +69,21 @@ export default function MergeGame() {
             tabIndex={0}
             ref={refFocus}
           >
-            {tiles.map((r, i) => (
-              <>
-                {r.map((t, idx) => (
-                  <div
-                    className={`rounded ${
-                      t > 0
-                        ? gradient[Math.min(Math.log2(t), gradient.length)] +
-                          ' shadow-lg text-black'
-                        : 'bg-secondary text-gray-500'
-                    } aspect-square flex items-center justify-center`}
-                    key={'tile-' + i + '-' + idx}
-                  >
-                    {t}
-                  </div>
-                ))}
-              </>
-            ))}
+            {tiles.flatMap((r, i) =>
+              r.map((t, idx) => (
+                <div
+                  className={`rounded ${
+                    t > 0
+                      ? gradient[Math.min(Math.log2(t), gradient.length)] +
+                        ' shadow-lg text-black'
+                      : 'bg-secondary text-gray-500'
+                  } aspect-square flex items-center justify-center`}
+                  key={'tile-' + i + '-' + idx}
+                >
+                  {t}
+                </div>
+              )),
+            )}
           </div>
           {isGameOver && (
             <div className="absolute bottom-1/2 w-full text-center text-3xl font-semibold">

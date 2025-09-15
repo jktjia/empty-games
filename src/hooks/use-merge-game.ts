@@ -44,16 +44,15 @@ export default function useMergeGame() {
 
     const restart = useCallback(() => {
         setTiles(initTiles())
-        setTurns(0)
         setScore(0)
-    }, [setTiles, setTurns, setScore])
+    }, [setTiles, setScore])
 
     useEffect(() => console.log(turns), [turns])
 
     return { tiles, score, up, down, left, right, isGameOver, restart }
 }
 
-function sameTiles(t1: number[][], t2: number[][]): boolean {
+export function sameTiles(t1: number[][], t2: number[][]): boolean {
     if (!validTiles(t1) || !validTiles(t2)) {
         throw new Error('invalid 2048 tiles')
     }
@@ -77,7 +76,7 @@ function makeBaseTiles(n: number = 4): number[][] {
     return baseTiles
 }
 
-function slideUp(tiles: number[][]): [number[][], number] {
+export function slideUp(tiles: number[][]): [number[][], number] {
     if (!validTiles(tiles)) {
         throw new Error('invalid 2048 tiles')
     }
@@ -94,7 +93,7 @@ function slideUp(tiles: number[][]): [number[][], number] {
     return [updated, score]
 }
 
-function slideDown(tiles: number[][]): [number[][], number] {
+export function slideDown(tiles: number[][]): [number[][], number] {
     if (!validTiles(tiles)) {
         throw new Error('invalid 2048 tiles')
     }
@@ -110,7 +109,8 @@ function slideDown(tiles: number[][]): [number[][], number] {
     }
     return [updated, score]
 }
-function slideLeft(tiles: number[][]): [number[][], number] {
+
+export function slideLeft(tiles: number[][]): [number[][], number] {
     if (!validTiles(tiles)) {
         throw new Error('invalid 2048 tiles')
     }
@@ -127,7 +127,7 @@ function slideLeft(tiles: number[][]): [number[][], number] {
     return [updated, score]
 }
 
-function slideRight(tiles: number[][]): [number[][], number] {
+export function slideRight(tiles: number[][]): [number[][], number] {
     if (!validTiles(tiles)) {
         throw new Error('invalid 2048 tiles')
     }
@@ -144,7 +144,7 @@ function slideRight(tiles: number[][]): [number[][], number] {
     return [updated, score]
 }
 
-function mergeValues(vals: number[]): [number[], number] {
+export function mergeValues(vals: number[]): [number[], number] {
     const merged = []
     var score = 0
     var justMerged = false;
@@ -164,13 +164,13 @@ function mergeValues(vals: number[]): [number[], number] {
     return [merged, score]
 }
 
-function initTiles(): number[][] {
+export function initTiles(): number[][] {
     const t1 = addNewTile(makeBaseTiles())
     const t2 = addNewTile(t1)
     return t2
 }
 
-function addNewTile(tiles: number[][]): number[][] {
+export function addNewTile(tiles: number[][]): number[][] {
     if (!validTiles(tiles)) {
         throw new Error('invalid 2048 tiles')
     }
@@ -193,7 +193,7 @@ function addNewTile(tiles: number[][]): number[][] {
     return updated
 }
 
-function emptyTiles(tiles: number[][]): number {
+export function emptyTiles(tiles: number[][]): number {
     if (!validTiles(tiles)) {
         throw new Error('invalid 2048 tiles')
     }

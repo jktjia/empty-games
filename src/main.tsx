@@ -1,36 +1,46 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import {
-  Outlet,
   RouterProvider,
   createRootRoute,
   createRoute,
   createRouter,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
-import App from './App.tsx'
 import { Toaster } from 'sonner'
+import BaseLayout from './layouts/base-layout.tsx'
+import GameLayout from './layouts/game-layout.tsx'
+import MergeGame from './pages/merge-game.tsx'
+import Minesweeper from './pages/minesweeper.tsx'
 
 const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
+  component: BaseLayout,
+})
+
+const gameRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'game',
+  component: GameLayout,
 })
 
 const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => gameRoute,
   path: '/',
-  component: App,
+  component: MergeGame,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute])
+const mineRoute = createRoute({
+  getParentRoute: () => gameRoute,
+  path: 'minesweeper',
+  component: Minesweeper,
+})
+
+const routeTree = rootRoute.addChildren([
+  gameRoute.addChildren([indexRoute, mineRoute]),
+])
 
 const router = createRouter({
   routeTree,
