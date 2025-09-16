@@ -70,17 +70,20 @@ export default function Minesweeper() {
         </Button>
         <div className="text-end flex-grow">Mines Remaining: {remaining()}</div>
       </CardHeader>
-      <CardContent className="min-w-fit">
-        <div className="relative w-fit">
+      <CardContent className="min-w-full">
+        <div className="relative">
           <div
-            className={`grid grid-cols-30 gap-1 transition-all text-xl p-2${
-              isGameOver() ? ' opacity-50' : ''
-            }`}
+            className={cn(
+              'grid grid-cols-30 gap-1 transition-all max-h-full min-w-4xl',
+              isGameOver() ? 'opacity-50' : '',
+            )}
           >
             {tiles.flatMap((r, i) =>
               r.map((t, idx) => {
-                let className =
-                  'rounded flex items-center justify-center aspect-square p-0 m-0 overflow-clip '
+                let className = cn(
+                  'rounded flex items-center justify-center aspect-square p-0 m-0 overflow-visible',
+                  'max-w-full',
+                )
                 let content: ReactNode = <></>
                 if (t == MineTileState.NOT_SEEN || !mines) {
                   className = cn(
@@ -88,7 +91,7 @@ export default function Minesweeper() {
                     'bg-muted-foreground opacity-50 shadow-lg',
                   )
                   if (isGameLost() && mines && mines[i][idx] == -1) {
-                    content = <Bomb className="text-accent max-w-full" />
+                    content = <Bomb className="text-accent" />
                   }
                 } else if (t == MineTileState.FLAG) {
                   className = cn(
@@ -96,11 +99,9 @@ export default function Minesweeper() {
                     'bg-muted-foreground opacity-50 shadow-lg',
                   )
                   if (isGameLost() && mines[i][idx] != -1) {
-                    content = <X className="text-accent max-w-full" />
+                    content = <X className="text-accent" />
                   } else {
-                    content = (
-                      <FlagTriangleRight className="text-accent max-w-full" />
-                    )
+                    content = <FlagTriangleRight className="text-accent" />
                   }
                 } else {
                   className = cn(
