@@ -28,7 +28,6 @@ export default function Minesweeper() {
   ) => {
     if (!isGameOver()) {
       e.preventDefault()
-      console.log(e.button, x, y)
       if (e.button === 0) {
         reveal(x, y)
       } else if (e.button === 2) {
@@ -45,6 +44,8 @@ export default function Minesweeper() {
       gameOverMessage={isGameLost() ? 'You Lost!' : 'You Won!'}
       isGameOver={isGameOver()}
       restart={restart}
+      // gameName="Minesweeper"
+      // rules="minesweeper rules here"
       scoreText={`Mines Remaining: ${remaining()}`}
     >
       <div

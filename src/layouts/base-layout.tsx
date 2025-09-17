@@ -1,12 +1,14 @@
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useNavigate } from '@tanstack/react-router'
 import EmptyProvider from '@/components/providers/empty-provider'
 import ThemeProvider from '@/components/providers/theme-provider'
 
 export default function BaseLayout() {
+  const navigate = useNavigate()
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <div className="text-center w-full h-screen overflow-auto">
-        <EmptyProvider>
+        <EmptyProvider navigate={navigate}>
           <Outlet />
         </EmptyProvider>
       </div>

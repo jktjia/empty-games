@@ -40,7 +40,7 @@ export default function GameContent({
         {rules && (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost">Rules</Button>
+              <Button variant="link">Rules</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
@@ -54,13 +54,11 @@ export default function GameContent({
         <div className="text-end flex-grow">{scoreText}</div>
       </CardHeader>
       <CardContent>
-        <div className="relative w-full">
+        <div className="h-full w-full items-center flex justify-center text-3xl font-semibold">
           {children}
           {isGameOver && (
-            <div className="absolute bottom-0 h-full w-full items-center flex justify-center text-3xl font-semibold">
-              <div className="w-fit bg-background/50 rounded p-2">
-                {gameOverMessage}
-              </div>
+            <div className="absolute w-fit bg-background/50 rounded p-2">
+              {gameOverMessage}
             </div>
           )}
         </div>

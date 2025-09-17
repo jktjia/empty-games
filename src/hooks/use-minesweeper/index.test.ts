@@ -1,8 +1,19 @@
-import { expect, test, vi } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { act, renderHook } from '@testing-library/react'
 import * as helperMod from './helpers'
 import useMinesweeper from "."
 import { MineTileState } from "@/lib/types"
+
+// Setup the spies
+const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+// Clean up after each test
+afterEach(() => {
+    getItemSpy.mockClear();
+    setItemSpy.mockClear();
+    localStorage.clear();
+});
 
 test('mine init', () => {
     const width = 8

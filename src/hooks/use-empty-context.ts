@@ -1,13 +1,18 @@
 import { useCallback, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
-
+import type { UseNavigateResult } from "@tanstack/react-router"
 import { abandonedMessages } from "@/lib/messages"
 import { EmptyContext } from "@/components/providers/empty-provider"
 
 const timeoutModifier = 1
 
-export function useEmptyProvider() {
+const gamePaths = ['/', '/minesweeper']
+
+export function useEmptyProvider({ navigate }: {
+    navigate: UseNavigateResult<string>
+}) {
     const [title, setTitle] = useState<string>("A Website")
+    const [startTime, setStartTime] = useState<Date>(new Date())
     const [lastActivity, setLastActivity] = useState<Date>(new Date())
 
     const [abandoned, setAbandoned] = useState<number>(0)
@@ -51,6 +56,15 @@ export function useEmptyProvider() {
             console.log("timeout not set")
         }
     }, [])
+
+    useEffect(() => {
+        const next = gamePaths[Math.floor(Math.random() * gamePaths.length)]
+        console.log(next)
+        setTimeout(() => {
+            setStartTime(new Date())
+            navigate({ to: next })
+        }, 10 * 60 * 1000 * timeoutModifier)
+    }, [startTime])
 
     return { title, setTitle, lastActivity, updateActivity }
 }

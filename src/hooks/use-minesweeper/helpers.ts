@@ -1,40 +1,41 @@
 import { MineTileState } from "@/lib/types"
 
-export function revealTile(x: number, y: number, height: number, width: number, mines: number[][], tiles: MineTileState[][]): boolean {
+export function revealTile(x: number, y: number, height: number, width: number, mines: number[][], tiles: MineTileState[][]): MineTileState[][] {
+    const dup = JSON.parse(JSON.stringify(tiles));
+    recursiveReveal(x, y, height, width, mines, dup)
+    return dup
+}
+
+function recursiveReveal(x: number, y: number, height: number, width: number, mines: number[][], tiles: MineTileState[][]): void {
     const current = tiles[y][x]
-    let isGameOver = false
     if (current == MineTileState.NOT_SEEN) {
         tiles[y][x] = MineTileState.SEEN
-        if (mines[y][x] == -1) {
-            isGameOver = true
-        }
         if (mines[y][x] == 0) {
             if (x > 0) {
-                isGameOver = isGameOver || revealTile(x - 1, y, height, width, mines, tiles)
+                recursiveReveal(x - 1, y, height, width, mines, tiles)
             }
             if (x > 0 && y > 0) {
-                isGameOver = isGameOver || revealTile(x - 1, y - 1, height, width, mines, tiles)
+                recursiveReveal(x - 1, y - 1, height, width, mines, tiles)
             }
             if (y > 0) {
-                isGameOver = isGameOver || revealTile(x, y - 1, height, width, mines, tiles)
+                recursiveReveal(x, y - 1, height, width, mines, tiles)
             }
             if (x < width - 1 && y > 0) {
-                isGameOver = isGameOver || revealTile(x + 1, y - 1, height, width, mines, tiles)
+                recursiveReveal(x + 1, y - 1, height, width, mines, tiles)
             } if (x < width - 1) {
-                isGameOver = isGameOver || revealTile(x + 1, y, height, width, mines, tiles)
+                recursiveReveal(x + 1, y, height, width, mines, tiles)
             }
             if (x < width - 1 && y < height - 1) {
-                isGameOver = isGameOver || revealTile(x + 1, y + 1, height, width, mines, tiles)
+                recursiveReveal(x + 1, y + 1, height, width, mines, tiles)
             }
             if (y < height - 1) {
-                isGameOver = isGameOver || revealTile(x, y + 1, height, width, mines, tiles)
+                recursiveReveal(x, y + 1, height, width, mines, tiles)
             }
             if (x > 0 && y < height - 1) {
-                isGameOver = isGameOver || revealTile(x - 1, y + 1, height, width, mines, tiles)
+                recursiveReveal(x - 1, y + 1, height, width, mines, tiles)
             }
         }
     }
-    return isGameOver
 }
 
 export function initMines(initX: number, initY: number, width: number, height: number, count: number): number[][] {

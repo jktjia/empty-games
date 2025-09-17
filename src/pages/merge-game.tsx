@@ -3,6 +3,7 @@ import useMergeGame from '@/hooks/use-merge-game'
 import useEmptyContext from '@/hooks/use-empty-context'
 import GameContent from '@/components/game-content'
 import { gradient } from '@/lib/colors'
+import { cn } from '@/lib/utils'
 
 export default function MergeGame() {
   const { updateActivity } = useEmptyContext()
@@ -36,9 +37,10 @@ export default function MergeGame() {
       scoreText={`Score: ${score}`}
     >
       <div
-        className={`grid grid-cols-4 gap-2 transition-all text-xl p-2${
-          isGameOver ? ' opacity-50' : ''
-        }`}
+        className={cn(
+          'grid grid-cols-4 gap-2 transition-all text-xl w-full p-2',
+          isGameOver ? ' opacity-50' : '',
+        )}
         onKeyDown={handleKeyDown}
         tabIndex={0}
         ref={refFocus}
