@@ -3,12 +3,11 @@ import { act, renderHook } from '@testing-library/react'
 import * as helperMod from './helpers'
 import useMinesweeper from "."
 import { MineTileState } from "@/lib/types"
+import { decrypt, encrypt } from "@/lib/utils"
 
-// Setup the spies
 const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
 const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 
-// Clean up after each test
 afterEach(() => {
     getItemSpy.mockClear();
     setItemSpy.mockClear();
@@ -21,6 +20,7 @@ test('mine init', () => {
     const count = 12
     const { result } = renderHook(() => useMinesweeper({ width, height, mineCount: count }))
 
+    expect(localStorage.getItem('minesweeper')).toBeFalsy()
     expect(result.current.mines).toBeUndefined()
     act(() => result.current.reveal(4, 2))
 
@@ -40,6 +40,7 @@ test('mine init', () => {
         expect(mines[1][4]).toBeGreaterThanOrEqual(0)
         expect(mines[1][5]).toBeGreaterThanOrEqual(0)
     }
+    expect(localStorage.getItem('minesweeper')).toBeTruthy()
 })
 
 test('mine init side', () => {
@@ -166,6 +167,11 @@ test('reveal', () => {
     expect(result.current.isGameLost()).toBeFalsy()
     expect(result.current.isGameWon()).toBeFalsy()
     expect(result.current.isGameOver()).toBeFalsy()
+    const storage = localStorage.getItem('minesweeper')
+    expect(storage).toBeTruthy()
+    if (storage) {
+        expect(JSON.parse(decrypt(storage))['tiles']).toStrictEqual(expected)
+    }
 })
 
 test('reveal expands from a 0', () => {
@@ -280,6 +286,11 @@ test('flag', () => {
     expect(result.current.isGameLost()).toBeFalsy()
     expect(result.current.isGameWon()).toBeFalsy()
     expect(result.current.isGameOver()).toBeFalsy()
+    const storage = localStorage.getItem('minesweeper')
+    expect(storage).toBeTruthy()
+    if (storage) {
+        expect(JSON.parse(decrypt(storage))['tiles']).toStrictEqual(expected)
+    }
 })
 
 test('unflag', () => {
@@ -319,6 +330,11 @@ test('unflag', () => {
     expect(result.current.isGameLost()).toBeFalsy()
     expect(result.current.isGameWon()).toBeFalsy()
     expect(result.current.isGameOver()).toBeFalsy()
+    const storage = localStorage.getItem('minesweeper')
+    expect(storage).toBeTruthy()
+    if (storage) {
+        expect(JSON.parse(decrypt(storage))['tiles']).toStrictEqual(expected)
+    }
 })
 
 test('flag does nothing if mines not initialized', () => {
@@ -522,4 +538,35 @@ test('flag last slot results in game won', () => {
     expect(result.current.isGameLost()).toBeFalsy()
     expect(result.current.isGameWon()).toBeFalsy()
     expect(result.current.isGameOver()).toBeFalsy()
+    const storage = localStorage.getItem('minesweeper')
+    expect(storage).toBeTruthy()
+    if (storage) {
+        expect(JSON.parse(decrypt(storage))['tiles']).toStrictEqual(expected)
+    }
+})
+
+test('uses local storage if applicable', () => {
+    const mines = [
+        [-1, -1, -1, -1],
+        [2, 3, 5, -1,],
+        [0, 0, 2, -1,],
+        [0, 0, 1, 1,],
+    ]
+    const tiles = [
+        [0, 0, 2, 0],
+        [1, 1, 1, 0],
+        [1, 1, 1, 0],
+        [1, 1, 1, 1],
+    ]
+    const encrypted = encrypt(JSON.stringify({ mines: mines, tiles: tiles }))
+    localStorage.setItem('minesweeper', encrypted)
+    const width = 4
+    const height = 4
+    const count = 6
+    const { result } = renderHook(() => useMinesweeper({
+        width, height, mineCount: count
+    }))
+
+    expect(result.current.mines).toStrictEqual(mines)
+    expect(result.current.tiles).toStrictEqual(tiles)
 })
