@@ -1,15 +1,44 @@
 import { Bomb, FlagTriangleRight, X } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import type { ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import useEmptyContext from '@/hooks/use-empty-context'
 import useMinesweeper from '@/hooks/use-minesweeper'
 import { MineTileState } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import GameContent from '@/components/game-content'
 import { gradient } from '@/lib/colors'
+import { Difficulty } from '@/lib/types'
+import type { MinesweeperSettings } from '@/lib/types'
+
+interface ColsSettings extends MinesweeperSettings {
+  gridCols: string
+}
+
+const difficultySettings: Record<Difficulty, ColsSettings> = {
+  [Difficulty.BEGINNER]: {
+    gridCols: 'grid-cols-9',
+    width: 9,
+    height: 9,
+    mineCount: 10,
+  },
+  [Difficulty.INTERMEDIATE]: {
+    gridCols: 'grid-cols-16',
+    width: 16,
+    height: 16,
+    mineCount: 40,
+  },
+  [Difficulty.EXPERT]: {
+    gridCols: 'grid-cols-30',
+    width: 30,
+    height: 16,
+    mineCount: 99,
+  },
+}
 
 export default function Minesweeper() {
   const { updateActivity } = useEmptyContext()
+  const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.EXPERT)
+  const settings = useMemo(() => difficultySettings[difficulty], [difficulty])
   const {
     tiles,
     mines,
@@ -19,7 +48,7 @@ export default function Minesweeper() {
     isGameOver,
     restart,
     remaining,
-  } = useMinesweeper({})
+  } = useMinesweeper(settings)
 
   const handleClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -46,11 +75,14 @@ export default function Minesweeper() {
       restart={restart}
       // gameName="Minesweeper"
       // rules="minesweeper rules here"
+      difficulty={difficulty}
+      setDifficulty={setDifficulty}
       scoreText={`Mines Remaining: ${remaining()}`}
     >
       <div
         className={cn(
-          'grid grid-cols-30 gap-1 transition-all max-h-full min-w-4xl',
+          'grid gap-1 transition-all max-h-full min-w-fit',
+          difficultySettings[difficulty].gridCols,
           isGameOver() ? 'opacity-50' : '',
         )}
       >

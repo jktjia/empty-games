@@ -9,6 +9,9 @@ import {
   DialogTrigger,
 } from './ui/dialog'
 import type { ReactNode } from 'react'
+import { Difficulty } from '@/lib/types'
+import { RadioGroup, RadioGroupItem } from './ui/radio-group'
+import { Label } from './ui/label'
 
 export default function GameContent({
   gameName,
@@ -16,6 +19,8 @@ export default function GameContent({
   scoreText,
   restart,
   isGameOver,
+  difficulty,
+  setDifficulty,
   gameOverMessage,
   children,
 }: {
@@ -24,6 +29,8 @@ export default function GameContent({
   scoreText?: string
   restart: () => void
   isGameOver?: boolean
+  difficulty?: Difficulty
+  setDifficulty?: (d: Difficulty) => void
   gameOverMessage?: string
   children?: ReactNode
 }) {
@@ -37,6 +44,44 @@ export default function GameContent({
         >
           Restart
         </Button>
+        {difficulty && setDifficulty && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="link">Difficulty</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Difficulty</DialogTitle>
+              </DialogHeader>
+              <RadioGroup
+                value={difficulty.toString()}
+                onValueChange={(v) => setDifficulty(parseInt(v) as Difficulty)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={Difficulty.BEGINNER.toString()}
+                    id="beginner"
+                  />
+                  <Label htmlFor="beginner">Beginner</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={Difficulty.INTERMEDIATE.toString()}
+                    id="intermediate"
+                  />
+                  <Label htmlFor="intermediate">Intermediate</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={Difficulty.EXPERT.toString()}
+                    id="expert"
+                  />
+                  <Label htmlFor="expert">Expert</Label>
+                </div>
+              </RadioGroup>
+            </DialogContent>
+          </Dialog>
+        )}
         {rules && (
           <Dialog>
             <DialogTrigger asChild>

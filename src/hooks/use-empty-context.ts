@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import type { UseNavigateResult } from "@tanstack/react-router"
-import { abandonedMessages } from "@/lib/messages"
+// import { abandonedMessages } from "@/lib/messages"
 import { EmptyContext } from "@/components/providers/empty-provider"
 
 const timeoutModifier = 1
@@ -27,16 +27,19 @@ export function useEmptyProvider({ navigate }: {
     const afkMessage = useCallback(() => {
         const now = new Date()
         const diff = now.valueOf() - lastActivity.valueOf()
-        console.log("last activity: %d minutes ago", diff / (60 * 1000) * timeoutModifier)
+        console.log("last activity: %d minutes ago", diff / (60 * 1000))
         if (diff < 5 * 60 * 1000 * timeoutModifier) {
             const id = setTimeout(afkMessage, (5 * 60 * 1000 - diff) * timeoutModifier)
             setTimeoutId(id)
             console.log("timeout reset")
         } else {
             setAbandoned(a => {
-                const message = abandonedMessages[Math.min(a, abandonedMessages.length - 1)]
-                toast(message.title, {
-                    description: message.description
+                // const message = abandonedMessages[Math.min(a, abandonedMessages.length - 1)]
+                // toast(message.title, {
+                //     description: message.description
+                // })
+                toast('Where did you go?', {
+                    description: `last activity: ${Math.floor(diff / (60 * 1000))} minutes, ${Math.floor((diff / 1000) % 60)} seconds ago`
                 })
                 return a + 1
             })

@@ -1,10 +1,27 @@
 import { useCallback, useMemo, useState } from "react"
 import { addNewTile, emptyTiles, initTiles, sameTiles, slideDown, slideLeft, slideRight, slideUp } from "./helpers"
+import { decrypt, encrypt } from "@/lib/utils"
+
+interface MergeGameState {
+    score: number
+    tiles: number[][]
+}
 
 export default function useMergeGame() {
-    const [tiles, setTiles] = useState<number[][]>(initTiles())
+    const [tiles, setTiles] = useState<number[][]>(() => {
+        const localMines = localStorage.getItem('merge-game')
+        return localMines ? JSON.parse(decrypt(localMines))['tiles'] : initTiles()
+    })
     const [turns, setTurns] = useState<number>(0)
-    const [score, setScore] = useState<number>(0)
+    const [score, setScore] = useState<number>(() => {
+        const localMines = localStorage.getItem('merge-game')
+        return localMines ? JSON.parse(decrypt(localMines))['score'] : 0
+    })
+
+    const updateLocal = (state: MergeGameState) => {
+        const strState = encrypt(JSON.stringify(state))
+        localStorage.setItem('merge-game', strState)
+    }
 
     const isGameOver = useMemo(() => {
         let gameOver = emptyTiles(tiles) == 0
@@ -21,6 +38,7 @@ export default function useMergeGame() {
             setTurns(n => !sameTiles(t, newTiles) ? n + 1 : n)
             return !sameTiles(t, newTiles) ? addNewTile(newTiles) : t
         })
+        updateLocal({ tiles: newTiles, score: score + s })
     }, [setScore, setTurns, setTiles])
 
     const up = () => {
