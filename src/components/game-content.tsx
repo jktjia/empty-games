@@ -44,7 +44,7 @@ export default function GameContent({
         >
           Restart
         </Button>
-        {difficulty && setDifficulty && (
+        {setDifficulty && difficulty != undefined && (
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="link">Difficulty</Button>

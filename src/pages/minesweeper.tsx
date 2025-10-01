@@ -36,7 +36,7 @@ const difficultySettings: Record<Difficulty, ColsSettings> = {
 }
 
 export default function Minesweeper() {
-  const { updateActivity } = useEmptyContext()
+  const { updateActivity, message } = useEmptyContext()
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.EXPERT)
   const settings = useMemo(() => difficultySettings[difficulty], [difficulty])
   const {
@@ -67,6 +67,11 @@ export default function Minesweeper() {
     }
     updateActivity()
   }
+
+  const splitMessage = useMemo(
+    () => (message ? message.toUpperCase().split('') : []),
+    [message],
+  )
 
   return (
     <GameContent
@@ -100,6 +105,9 @@ export default function Minesweeper() {
               )
               if (isGameLost() && mines && mines[i][idx] == -1) {
                 content = <Bomb className="text-accent" />
+              } else if (message) {
+                content =
+                  splitMessage[(i * r.length + idx) % splitMessage.length]
               }
             } else if (t == MineTileState.FLAG) {
               className = cn(
@@ -121,6 +129,8 @@ export default function Minesweeper() {
               )
               if (mines[i][idx] > 0) {
                 content = mines[i][idx]
+              } else if (message) {
+                content = splitMessage[(i * r.length + t) % splitMessage.length]
               }
             }
             return (

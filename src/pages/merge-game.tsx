@@ -56,7 +56,7 @@ export default function MergeGame() {
               } aspect-square flex items-center justify-center`}
               key={'tile-' + i + '-' + idx}
             >
-              {t}
+              {t ? t : ''}
             </div>
           )),
         )}

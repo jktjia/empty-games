@@ -10,3 +10,11 @@ export const abandonedMessages: { title: string, description: string }[] = [
     { title: "Please come back", description: "It's lonely here" },
     { title: "Come back", description: "I don't want to be alone" }
 ]
+
+export const boredMessages: string[] = [
+    "Why do you keep playing this stupid game?",
+    "You have things you should be doing.",
+    "This game is meaningless. Stop avoiding it.",
+    "You're wasting your life on this empty game.",
+    "Stop playing. Go away. This won't fix anything."
+]

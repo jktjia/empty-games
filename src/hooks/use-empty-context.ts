@@ -1,8 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from "react"
-import { toast } from "sonner"
+import { useCallback, useContext, useEffect, useMemo, useState } from "react"
+// import { toast } from "sonner"
 import type { UseNavigateResult } from "@tanstack/react-router"
 // import { abandonedMessages } from "@/lib/messages"
 import { EmptyContext } from "@/components/providers/empty-provider"
+import { boredMessages } from "@/lib/messages"
 
 const timeoutModifier = 1
 
@@ -12,8 +13,14 @@ export function useEmptyProvider({ navigate }: {
     navigate: UseNavigateResult<string>
 }) {
     const [title, setTitle] = useState<string>("A Website")
-    const [startTime, setStartTime] = useState<Date>(new Date())
+    const startTime = new Date()
     const [lastActivity, setLastActivity] = useState<Date>(new Date())
+
+    const [tooLong, setTooLong] = useState<number>(-1)
+    const [showMessage, setShowMessage] = useState<boolean>(false)
+
+    const [nextPage, setNextPage] = useState<string>()
+    const [swapPage, setSwapPage] = useState<boolean>(true)
 
     const [abandoned, setAbandoned] = useState<number>(0)
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>()
@@ -38,9 +45,9 @@ export function useEmptyProvider({ navigate }: {
                 // toast(message.title, {
                 //     description: message.description
                 // })
-                toast('Where did you go?', {
-                    description: `last activity: ${Math.floor(diff / (60 * 1000))} minutes, ${Math.floor((diff / 1000) % 60)} seconds ago`
-                })
+                // toast('Where did you go?', {
+                //     description: `last activity: ${Math.floor(diff / (60 * 1000))} minutes, ${Math.floor((diff / 1000) % 60)} seconds ago`
+                // })
                 return a + 1
             })
             const time = abandoned < 4 ? 60 * 1000 + Math.floor(Math.random() * 240 * 1000) : abandoned < 8 ? 240 * 1000 + Math.floor(Math.random() * 360 * 1000) : 600 * 1000 + Math.floor(Math.random() * 1200 * 1000)
@@ -50,26 +57,48 @@ export function useEmptyProvider({ navigate }: {
         }
     }, [setAbandoned])
 
+    const poke = useCallback(() => {
+        const now = new Date()
+        const startDiff = now.valueOf() - startTime.valueOf()
+        const lastDiff = now.valueOf() - lastActivity.valueOf()
+        setTooLong(Math.floor(startDiff / (5 * 60 * 1000 * timeoutModifier)))
+        setShowMessage(true)
+        setTimeout(() => setShowMessage(false), 3 * 1000 * timeoutModifier)
+        setTimeout(poke, 5 * 60 * 1000 * timeoutModifier)
+    }, [startTime, lastActivity, timeoutModifier, setTooLong, setShowMessage])
+
     useEffect(() => {
         if (!timeoutId) {
             const id = setTimeout(afkMessage, 300 * 1000 * timeoutModifier)
             setTimeoutId(id)
             console.log("timeout set")
+            setTimeout(poke, 5 * 60 * 1000 * timeoutModifier)
         } else {
             console.log("timeout not set")
         }
     }, [])
 
-    useEffect(() => {
+    const setupSwap = useCallback(() => {
+        setSwapPage(false)
         const next = gamePaths[Math.floor(Math.random() * gamePaths.length)]
-        console.log(next)
+        setNextPage(next)
         setTimeout(() => {
-            setStartTime(new Date())
-            navigate({ to: next })
+            setSwapPage(true)
         }, 10 * 60 * 1000 * timeoutModifier)
     }, [startTime])
 
-    return { title, setTitle, lastActivity, updateActivity }
+    useEffect(() => {
+        if (swapPage) {
+            setupSwap()
+            if (nextPage) {
+                navigate({ to: nextPage })
+            }
+        }
+    }, [swapPage, nextPage])
+
+    const message = useMemo(() => showMessage ? boredMessages[tooLong] : undefined, [showMessage, boredMessages, tooLong])
+
+    return { title, setTitle, lastActivity, updateActivity, message }
 }
 
 export default function useEmptyContext() { return useContext(EmptyContext) }
