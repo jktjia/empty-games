@@ -1,10 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: "bun"
-    directory: "/"
+  - package-ecosystem: 'bun'
+    directory: '/'
     schedule:
-      interval: "monthly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github"
+      interval: 'monthly'
+  - package-ecosystem: 'github-actions'
+    directory: '/.github'
     schedule:
-      interval: "monthly"
+      interval: 'monthly'

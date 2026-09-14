@@ -1,7 +1,7 @@
 import { createContext } from 'react'
 import type { ReactNode } from 'react'
-import { useEmptyProvider } from '@/hooks/use-empty-context'
 import type { UseNavigateResult } from '@tanstack/react-router'
+import { useEmptyProvider } from '@/hooks/use-empty-context'
 
 interface EmptyContextType {
   title: string

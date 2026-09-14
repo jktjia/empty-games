@@ -3,16 +3,16 @@
 import { tanstackConfig } from '@tanstack/eslint-config'
 
 export default [
-    ...tanstackConfig,
-    {
-        rules: {
-            '@typescript-eslint/array-type': [
-                'error',
-                { default: 'array', readonly: 'array' },
-            ]
-        }
+  ...tanstackConfig,
+  {
+    rules: {
+      '@typescript-eslint/array-type': [
+        'error',
+        { default: 'array', readonly: 'array' },
+      ],
     },
-    {
-        ignores: ["src/components/ui/*"],
-    }
+  },
+  {
+    ignores: ['src/components/ui/*'],
+  },
 ]

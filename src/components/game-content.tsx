@@ -8,10 +8,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
-import type { ReactNode } from 'react'
-import { Difficulty } from '@/lib/types'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 import { Label } from './ui/label'
+import type { ReactNode } from 'react'
+import { Difficulty } from '@/lib/types'
 
 export default function GameContent({
   gameName,
@@ -22,6 +22,7 @@ export default function GameContent({
   difficulty,
   setDifficulty,
   gameOverMessage,
+  resetFocus,
   children,
 }: {
   gameName?: string
@@ -32,6 +33,7 @@ export default function GameContent({
   difficulty?: Difficulty
   setDifficulty?: (d: Difficulty) => void
   gameOverMessage?: string
+  resetFocus?: () => void
   children?: ReactNode
 }) {
   return (
@@ -39,7 +41,10 @@ export default function GameContent({
       <CardHeader className="text-xl font-semibold flex flex-row gap-1">
         <Button
           variant="secondary"
-          onClick={restart}
+          onClick={() => {
+            restart()
+            resetFocus && resetFocus()
+          }}
           className="hover:cursor-pointer"
         >
           Restart
@@ -55,7 +60,7 @@ export default function GameContent({
               </DialogHeader>
               <RadioGroup
                 value={difficulty.toString()}
-                onValueChange={(v) => setDifficulty(parseInt(v) as Difficulty)}
+                onValueChange={(v) => setDifficulty(parseInt(v))}
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem

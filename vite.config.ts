@@ -17,5 +17,5 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
-  base: "https://jktjia.github.io/empty-games",
+  base: 'https://jktjia.github.io/empty-games',
 })

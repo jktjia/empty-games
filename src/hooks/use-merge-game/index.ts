@@ -1,21 +1,33 @@
-import { useCallback, useMemo, useState } from "react"
-import { addNewTile, emptyTiles, initTiles, sameTiles, slideDown, slideLeft, slideRight, slideUp } from "./helpers"
-import { decrypt, encrypt } from "@/lib/utils"
+import { useCallback, useMemo, useState } from 'react'
+import {
+    addNewTile,
+    emptyTiles,
+    initTiles,
+    nextId,
+    sameTiles,
+    slideDown,
+    slideLeft,
+    slideRight,
+    slideUp,
+} from './helpers'
+import type { MergeSpace } from '@/lib/types'
+import { decrypt, encrypt } from '@/lib/utils'
 
 interface MergeGameState {
     score: number
-    tiles: number[][]
+    tiles: MergeSpace[][]
 }
 
 export default function useMergeGame() {
-    const [tiles, setTiles] = useState<number[][]>(() => {
-        const localMines = localStorage.getItem('merge-game')
-        return localMines ? JSON.parse(decrypt(localMines))['tiles'] : initTiles()
+    const [tiles, setTiles] = useState<MergeSpace[][]>(() => {
+        const localTiles = localStorage.getItem('merge-game')
+        return localTiles ? JSON.parse(decrypt(localTiles))['tiles'] : initTiles()
+        // return initTiles()
     })
     const [turns, setTurns] = useState<number>(0)
     const [score, setScore] = useState<number>(() => {
-        const localMines = localStorage.getItem('merge-game')
-        return localMines ? JSON.parse(decrypt(localMines))['score'] : 0
+        const localTiles = localStorage.getItem('merge-game')
+        return localTiles ? JSON.parse(decrypt(localTiles))['score'] : 0
     })
 
     const updateLocal = (state: MergeGameState) => {
@@ -32,33 +44,45 @@ export default function useMergeGame() {
         return gameOver
     }, [tiles])
 
-    const update = useCallback((newTiles: number[][], s: number) => {
-        setScore(old => old + s)
-        setTiles(t => {
-            setTurns(n => !sameTiles(t, newTiles) ? n + 1 : n)
-            return !sameTiles(t, newTiles) ? addNewTile(newTiles) : t
-        })
-        updateLocal({ tiles: newTiles, score: score + s })
-    }, [setScore, setTurns, setTiles])
+    const update = useCallback(
+        (newTiles: MergeSpace[][], s: number, id: number) => {
+            setScore((old) => old + s)
+            setTiles((t) => {
+                setTurns((n) => (!sameTiles(t, newTiles) ? n + 1 : n))
+                if (sameTiles(t, newTiles)) {
+                    updateLocal({ tiles: t, score: score + s })
+                    return t
+                }
+                let withNewTile = addNewTile(newTiles, id)
+                updateLocal({ tiles: withNewTile, score: score + s })
+                return withNewTile
+            })
+        },
+        [setScore, setTurns, setTiles],
+    )
 
     const up = () => {
+        const id = nextId(tiles)
         const [newTiles, s] = slideUp(tiles)
-        update(newTiles, s)
+        update(newTiles, s, id)
     }
 
     const down = () => {
+        const id = nextId(tiles)
         const [newTiles, s] = slideDown(tiles)
-        update(newTiles, s)
+        update(newTiles, s, id)
     }
 
     const left = () => {
+        const id = nextId(tiles)
         const [newTiles, s] = slideLeft(tiles)
-        update(newTiles, s)
+        update(newTiles, s, id)
     }
 
     const right = () => {
+        const id = nextId(tiles)
         const [newTiles, s] = slideRight(tiles)
-        update(newTiles, s)
+        update(newTiles, s, id)
     }
 
     const restart = useCallback(() => {
@@ -69,4 +93,3 @@ export default function useMergeGame() {
 
     return { tiles, score, up, down, left, right, isGameOver, restart }
 }
-
