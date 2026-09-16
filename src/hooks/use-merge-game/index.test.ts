@@ -30,6 +30,7 @@ test('init tiles', () => {
     ),
   ).toBe(1)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide up', () => {
@@ -65,6 +66,7 @@ test('slide up', () => {
   expect(nEmptyTiles).toBe(11)
   expect(result.current.score).toBe(4)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide up 2', () => {
@@ -98,6 +100,7 @@ test('slide up 2', () => {
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(8)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide up same', () => {
@@ -133,6 +136,7 @@ test('slide up same', () => {
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(0)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide down', () => {
@@ -168,6 +172,7 @@ test('slide down', () => {
   expect(nEmptyTiles).toBe(11)
   expect(result.current.score).toBe(4)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide down 2', () => {
@@ -201,6 +206,7 @@ test('slide down 2', () => {
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(8)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide left', () => {
@@ -240,6 +246,7 @@ test('slide left', () => {
   expect(nEmptyTiles).toBe(9)
   expect(result.current.score).toBe(16)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide left 2', () => {
@@ -273,6 +280,7 @@ test('slide left 2', () => {
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(4)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide right', () => {
@@ -312,6 +320,7 @@ test('slide right', () => {
   expect(nEmptyTiles).toBe(9)
   expect(result.current.score).toBe(16)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('slide right 2', () => {
@@ -345,6 +354,7 @@ test('slide right 2', () => {
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(4)
   expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
 })
 
 test('game over when nowhere to move', () => {
@@ -382,6 +392,42 @@ test('game over when nowhere to move', () => {
 
   expect(result.current.score).toBe(8)
   expect(result.current.isGameOver).toBe(true)
+  expect(result.current.isGameWon).toBe(false)
+})
+
+test('game won when 2048 on board', () => {
+  const tileSpy = vi.spyOn(helperMod, 'initTiles')
+  tileSpy.mockReturnValue([
+    [null, null, null, { id: 0, value: 2 }],
+    [null, { id: 1, value: 2 }, { id: 2, value: 2048 }, { id: 3, value: 2 }],
+    [null, null, null, null],
+    [null, null, null, null],
+  ])
+
+  const { result } = renderHook(() => useMergeGame())
+
+  act(() => result.current.right())
+
+  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(true)
+})
+
+
+test('game won when 2048 exceeded', () => {
+  const tileSpy = vi.spyOn(helperMod, 'initTiles')
+  tileSpy.mockReturnValue([
+    [null, null, null, { id: 0, value: 2 }],
+    [null, { id: 1, value: 2 }, { id: 2, value: 4096 }, { id: 3, value: 2 }],
+    [null, null, null, null],
+    [null, null, null, null],
+  ])
+
+  const { result } = renderHook(() => useMergeGame())
+
+  act(() => result.current.right())
+
+  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameWon).toBe(true)
 })
 
 test('restart', () => {

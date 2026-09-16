@@ -10,11 +10,22 @@ import useEmptyContext from '@/hooks/use-empty-context'
 import GameContent from '@/components/game-content'
 import { gradient } from '@/lib/colors'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 export default function MergeGame() {
   const { updateActivity } = useEmptyContext()
-  const { tiles, score, up, down, left, right, isGameOver, restart } =
-    useMergeGame()
+  const {
+    tiles,
+    score,
+    up,
+    down,
+    left,
+    right,
+    isGameOver,
+    isGameWon,
+    restart,
+    continueGame,
+  } = useMergeGame()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     startTransition(() => {
@@ -81,6 +92,17 @@ export default function MergeGame() {
           ),
         )}
       </div>
+      {isGameWon && (
+        <div className="absolute w-fit flex flex-col gap-2">
+          <div className="bg-background/50 rounded p-2">Game Won!</div>
+          <Button
+            className="bg-background/50 text-white"
+            onClick={continueGame}
+          >
+            Continue
+          </Button>
+        </div>
+      )}
     </GameContent>
   )
 }
