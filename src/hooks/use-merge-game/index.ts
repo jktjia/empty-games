@@ -1,108 +1,152 @@
-import { useCallback, useMemo, useState } from 'react'
+import { startTransition, useCallback, useMemo, useState } from 'react'
 import {
-    addNewTile,
-    emptyTiles,
-    initTiles,
-    nextId,
-    sameTiles,
-    slideDown,
-    slideLeft,
-    slideRight,
-    slideUp,
+  addNewTile,
+  emptyTiles,
+  initTiles,
+  nextId,
+  sameTiles,
+  slideDown,
+  slideLeft,
+  slideRight,
+  slideUp,
 } from './helpers'
-import type { MergeSpace } from '@/lib/types'
+import { useInterfere } from './use-interfere'
+import type {MergeSpace} from '@/lib/types';
+import { Direction  } from '@/lib/types'
 import { decrypt, encrypt } from '@/lib/utils'
 
 interface MergeGameState {
-    score: number
-    tiles: MergeSpace[][]
-    continue: boolean
+  score: number
+  tiles: MergeSpace[][]
+  continue: boolean
 }
 
 export default function useMergeGame() {
-    const [tiles, setTiles] = useState<MergeSpace[][]>(() => {
-        const localTiles = localStorage.getItem('merge-game')
-        return localTiles ? JSON.parse(decrypt(localTiles))['tiles'] : initTiles()
-    })
-    const [turns, setTurns] = useState<number>(0)
-    const [score, setScore] = useState<number>(() => {
-        const localTiles = localStorage.getItem('merge-game')
-        return localTiles ? JSON.parse(decrypt(localTiles))['score'] : 0
-    })
-    const [continueWin, setContinueWin] = useState<boolean>(() => {
-        const localTiles = localStorage.getItem('merge-game')
-        return localTiles ? JSON.parse(decrypt(localTiles))['continue'] : false
-    })
+  const [tiles, setTiles] = useState<MergeSpace[][]>(() => {
+    const localTiles = localStorage.getItem('merge-game')
+    return localTiles ? JSON.parse(decrypt(localTiles))['tiles'] : initTiles()
+  })
+  const [turns, setTurns] = useState<number>(0)
+  const [score, setScore] = useState<number>(() => {
+    const localTiles = localStorage.getItem('merge-game')
+    return localTiles ? JSON.parse(decrypt(localTiles))['score'] : 0
+  })
+  const [continueWin, setContinueWin] = useState<boolean>(() => {
+    const localTiles = localStorage.getItem('merge-game')
+    return localTiles ? JSON.parse(decrypt(localTiles))['continue'] : false
+  })
+  const [lastMoveTime, setLastMoveTime] = useState<Date>(new Date())
+  const [lastMove, setLastMove] = useState<Direction>()
 
-    const updateLocal = (state: MergeGameState) => {
-        const strState = encrypt(JSON.stringify(state))
-        localStorage.setItem('merge-game', strState)
-    }
+  const updateLocal = (state: MergeGameState) => {
+    const strState = encrypt(JSON.stringify(state))
+    localStorage.setItem('merge-game', strState)
+  }
 
-    const isGameOver = useMemo(() => {
-        let gameOver = emptyTiles(tiles) == 0
-        gameOver = gameOver && sameTiles(tiles, slideUp(tiles)[0])
-        gameOver = gameOver && sameTiles(tiles, slideDown(tiles)[0])
-        gameOver = gameOver && sameTiles(tiles, slideLeft(tiles)[0])
-        gameOver = gameOver && sameTiles(tiles, slideRight(tiles)[0])
-        return gameOver
-    }, [tiles])
+  const isGameOver = useMemo(() => {
+    let gameOver = emptyTiles(tiles) == 0
+    gameOver = gameOver && sameTiles(tiles, slideUp(tiles)[0])
+    gameOver = gameOver && sameTiles(tiles, slideDown(tiles)[0])
+    gameOver = gameOver && sameTiles(tiles, slideLeft(tiles)[0])
+    gameOver = gameOver && sameTiles(tiles, slideRight(tiles)[0])
+    return gameOver
+  }, [tiles])
 
-    const isGameWon = useMemo(() => {
-        return (!continueWin) && tiles.flatMap((t) => t).some((t) => t && t.value >= 2048)
-    }, [continueWin, tiles])
-
-    const update = useCallback(
-        (newTiles: MergeSpace[][], s: number, id: number) => {
-            setScore((old) => old + s)
-            setTiles((t) => {
-                setTurns((n) => (!sameTiles(t, newTiles) ? n + 1 : n))
-                if (sameTiles(t, newTiles)) {
-                    updateLocal({ tiles: t, score: score + s, continue: continueWin })
-                    return t
-                }
-                let withNewTile = addNewTile(newTiles, id)
-                updateLocal({ tiles: withNewTile, score: score + s, continue: continueWin })
-                return withNewTile
-            })
-        },
-        [setScore, setTurns, setTiles, continueWin],
+  const isGameWon = useMemo(() => {
+    return (
+      !continueWin && tiles.flatMap((t) => t).some((t) => t && t.value >= 2048)
     )
+  }, [continueWin, tiles])
 
-    const up = () => {
-        const id = nextId(tiles)
-        const [newTiles, s] = slideUp(tiles)
-        update(newTiles, s, id)
-    }
+  const update = useCallback(
+    (newTiles: MergeSpace[][], s: number, id: number) => {
+      if (!isGameOver && !isGameWon) {
+        startTransition(() => {
+          setScore((old) => old + s)
+          setTiles((t) => {
+            const moveWorked = !sameTiles(t, newTiles)
+            setTurns((n) => (moveWorked ? n + 1 : n))
+            if (moveWorked) {
+              setLastMoveTime(new Date())
+            } else {
+              updateLocal({ tiles: t, score: score + s, continue: continueWin })
+              return t
+            }
+            const withNewTile = addNewTile(newTiles, id)
+            updateLocal({
+              tiles: withNewTile,
+              score: score + s,
+              continue: continueWin,
+            })
+            return withNewTile
+          })
+        })
+      }
+    },
+    [setScore, setTurns, setTiles, continueWin, setLastMoveTime],
+  )
 
-    const down = () => {
-        const id = nextId(tiles)
-        const [newTiles, s] = slideDown(tiles)
-        update(newTiles, s, id)
-    }
+  const up = () => {
+    const id = nextId(tiles)
+    const [newTiles, s] = slideUp(tiles)
+    update(newTiles, s, id)
+    setLastMove(Direction.UP)
+  }
 
-    const left = () => {
-        const id = nextId(tiles)
-        const [newTiles, s] = slideLeft(tiles)
-        update(newTiles, s, id)
-    }
+  const down = () => {
+    const id = nextId(tiles)
+    const [newTiles, s] = slideDown(tiles)
+    update(newTiles, s, id)
+    setLastMove(Direction.DOWN)
+  }
 
-    const right = () => {
-        const id = nextId(tiles)
-        const [newTiles, s] = slideRight(tiles)
-        update(newTiles, s, id)
-    }
+  const left = () => {
+    const id = nextId(tiles)
+    const [newTiles, s] = slideLeft(tiles)
+    update(newTiles, s, id)
+    setLastMove(Direction.LEFT)
+  }
 
-    const restart = useCallback(() => {
-        setTiles(initTiles())
-        setScore(0)
-        setContinueWin(false)
-        console.log(turns)
-    }, [setTiles, setScore, turns])
+  const right = () => {
+    const id = nextId(tiles)
+    const [newTiles, s] = slideRight(tiles)
+    update(newTiles, s, id)
+    setLastMove(Direction.RIGHT)
+  }
 
-    const continueGame = useCallback(() => {
-        setContinueWin(true)
-    }, [setContinueWin])
+  const restart = useCallback(() => {
+    const newTiles = initTiles()
+    setTiles(newTiles)
+    setScore(0)
+    setContinueWin(false)
+    updateLocal({ tiles: newTiles, score: 0, continue: false })
+    console.log(turns)
+  }, [setTiles, setScore, turns])
 
-    return { tiles, score, up, down, left, right, isGameOver, isGameWon, restart, continueGame }
+  const continueGame = useCallback(() => {
+    setContinueWin(true)
+  }, [setContinueWin])
+
+  const getLastMoveTime = useCallback(() => {
+    return lastMoveTime
+  }, [lastMoveTime])
+
+  const getLastMove = useCallback(() => {
+    return lastMove
+  }, [lastMoveTime])
+
+  useInterfere({ up, down, left, right, getLastMoveTime, getLastMove })
+
+  return {
+    tiles,
+    score,
+    up,
+    down,
+    left,
+    right,
+    isGameOver,
+    isGameWon,
+    restart,
+    continueGame,
+  }
 }

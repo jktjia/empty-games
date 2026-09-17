@@ -101,7 +101,7 @@ export default function GameContent({
             </DialogContent>
           </Dialog>
         )}
-        <div className="text-end flex-grow">{scoreText}</div>
+        <div className="text-end grow">{scoreText}</div>
       </CardHeader>
       <CardContent>
         <div className="h-full w-full items-center flex justify-center text-3xl font-semibold">

@@ -412,7 +412,6 @@ test('game won when 2048 on board', () => {
   expect(result.current.isGameWon).toBe(true)
 })
 
-
 test('game won when 2048 exceeded', () => {
   const tileSpy = vi.spyOn(helperMod, 'initTiles')
   tileSpy.mockReturnValue([

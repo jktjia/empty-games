@@ -4,6 +4,13 @@ export interface MinesweeperSettings {
   mineCount?: number
 }
 
+export enum Direction {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+}
+
 export enum MineTileState {
   FLAG,
   SEEN,
