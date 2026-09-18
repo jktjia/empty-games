@@ -157,6 +157,7 @@ export default function useMergeGame() {
     left,
     right,
     isGameOver,
+    isGameLost,
     isGameWon,
     restart,
     continueGame,

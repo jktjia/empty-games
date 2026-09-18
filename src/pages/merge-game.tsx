@@ -16,6 +16,7 @@ export default function MergeGame() {
     left,
     right,
     isGameOver,
+    isGameLost,
     isGameWon,
     restart,
     continueGame,
@@ -46,7 +47,7 @@ export default function MergeGame() {
   return (
     <GameContent
       gameOverMessage="Game Over!"
-      isGameOver={isGameOver()}
+      isGameOver={isGameLost}
       restart={restart}
       scoreText={`Score: ${score}`}
       resetFocus={focusGrid}

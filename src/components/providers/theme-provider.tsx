@@ -50,9 +50,9 @@ export default function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (t: Theme) => {
+      localStorage.setItem(storageKey, t)
+      setTheme(t)
     },
   }
 

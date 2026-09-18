@@ -86,7 +86,7 @@ export default function Minesweeper() {
     >
       <div
         className={cn(
-          'grid gap-1 transition-all max-h-full min-w-fit',
+          'grid gap-1 transition-all max-h-full min-w-full',
           difficultySettings[difficulty].gridCols,
           isGameOver() ? 'opacity-50' : '',
         )}
@@ -136,6 +136,7 @@ export default function Minesweeper() {
             return (
               <Button
                 className={className}
+                size={'sm'}
                 key={'tile-' + i + '-' + idx}
                 onClick={(e) => handleClick(e, idx, i)}
                 onContextMenu={(e) => handleClick(e, idx, i)}
