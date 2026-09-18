@@ -29,7 +29,7 @@ test('init tiles', () => {
         .map((t) => t.id),
     ),
   ).toBe(1)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -65,7 +65,7 @@ test('slide up', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(11)
   expect(result.current.score).toBe(4)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -99,7 +99,7 @@ test('slide up 2', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(8)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -135,7 +135,7 @@ test('slide up same', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(0)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -171,7 +171,7 @@ test('slide down', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(11)
   expect(result.current.score).toBe(4)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -205,7 +205,7 @@ test('slide down 2', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(8)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -245,7 +245,7 @@ test('slide left', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(9)
   expect(result.current.score).toBe(16)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -279,7 +279,7 @@ test('slide left 2', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(4)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -319,7 +319,7 @@ test('slide right', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(9)
   expect(result.current.score).toBe(16)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -353,7 +353,7 @@ test('slide right 2', () => {
     .filter((t) => t == null).length
   expect(nEmptyTiles).toBe(12)
   expect(result.current.score).toBe(4)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -391,7 +391,7 @@ test('game over when nowhere to move', () => {
   act(() => result.current.left())
 
   expect(result.current.score).toBe(8)
-  expect(result.current.isGameOver).toBe(true)
+  expect(result.current.isGameLost).toBe(true)
   expect(result.current.isGameWon).toBe(false)
 })
 
@@ -408,7 +408,7 @@ test('game won when 2048 on board', () => {
 
   act(() => result.current.right())
 
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(true)
 })
 
@@ -425,7 +425,7 @@ test('game won when 2048 exceeded', () => {
 
   act(() => result.current.right())
 
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(true)
 })
 
@@ -476,7 +476,7 @@ test('restart', () => {
   act(() => result.current.restart())
 
   expect(result.current.score).toBe(0)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(
     result.current.tiles.flatMap((t) => t).filter((t) => t != null).length,
   ).toBe(2)
@@ -496,7 +496,7 @@ test('id edge case', () => {
   act(() => result.current.left())
 
   expect(result.current.score).toBe(4)
-  expect(result.current.isGameOver).toBe(false)
+  expect(result.current.isGameLost).toBe(false)
   expect(
     result.current.tiles.flatMap((t) => t).filter((t) => t != null).length,
   ).toBe(2)
