@@ -30,3 +30,7 @@ export const boredMessages: string[] = [
   "You're wasting your life on this empty game.",
   "Stop playing. Go away. This won't fix anything.",
 ]
+
+export const staySorryMessage = "I'm sorry\nPlease stay\n"
+export const stayResponseText = ['Promise?', "Let's play more games together!"]
+export const stayBtnText = ["It's okay", "I'll stay", '[ Play more games ]']

@@ -1,13 +1,15 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-// import { toast } from "sonner"
+import { toast } from 'sonner'
 import type { UseNavigateResult } from '@tanstack/react-router'
-// import { abandonedMessages } from "@/lib/messages"
 import { EmptyContext } from '@/components/providers/empty-provider'
-import { boredMessages } from '@/lib/messages'
+import { abandonedMessages, boredMessages } from '@/lib/messages'
+import { DONT_LEAVE_PATH, FEED_ME_PATH, MINESWEEPER_PATH } from '@/lib/paths'
+import { decrypt, encrypt } from '@/lib/utils'
 
-const timeoutModifier = 1
+export const timeoutModifier = 1
 
-const gamePaths = ['/', '/minesweeper']
+const gamePaths = ['/', '/' + MINESWEEPER_PATH]
+const randomPaths = [...gamePaths, '/' + FEED_ME_PATH]
 
 export function useEmptyProvider({
   navigate,
@@ -16,7 +18,10 @@ export function useEmptyProvider({
 }) {
   const [title, setTitle] = useState<string>('A Website')
   const startTime = new Date()
-  const [lastActivity, setLastActivity] = useState<Date>(new Date())
+  const [lastActivity, setLastActivity] = useState<Date>(() => {
+    const localTime = localStorage.getItem('last-activity')
+    return localTime ? JSON.parse(decrypt(localTime)) : new Date()
+  })
 
   const [tooLong, setTooLong] = useState<number>(-1)
   const [showMessage, setShowMessage] = useState<boolean>(false)
@@ -27,10 +32,16 @@ export function useEmptyProvider({
   const [abandoned, setAbandoned] = useState<number>(0)
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>()
 
+  const updateLocal = (activity: Date) => {
+    const strActivity = encrypt(JSON.stringify(activity))
+    localStorage.setItem('last-activity', strActivity)
+  }
+
   const updateActivity = useCallback(() => {
     const now = new Date()
     setLastActivity(now)
     setAbandoned(0)
+    updateLocal(now)
   }, [setLastActivity, setAbandoned, timeoutId, setTimeoutId])
 
   const afkMessage = useCallback(() => {
@@ -45,16 +56,16 @@ export function useEmptyProvider({
       setTimeoutId(id)
       console.log('timeout reset')
     } else {
-      setAbandoned((a) => {
-        // const message = abandonedMessages[Math.min(a, abandonedMessages.length - 1)]
-        // toast(message.title, {
-        //     description: message.description
-        // })
-        // toast('Where did you go?', {
-        //     description: `last activity: ${Math.floor(diff / (60 * 1000))} minutes, ${Math.floor((diff / 1000) % 60)} seconds ago`
-        // })
-        return a + 1
-      })
+      // setAbandoned((a) => {
+      //     const message = abandonedMessages[Math.min(a, abandonedMessages.length - 1)]
+      //     toast(message.title, {
+      //         description: message.description
+      //     })
+      //     toast('Where did you go?', {
+      //         description: `last activity: ${Math.floor(diff / (60 * 1000))} minutes, ${Math.floor((diff / 1000) % 60)} seconds ago`
+      //     })
+      //     return a + 1
+      // })
       const time =
         abandoned < 4
           ? 60 * 1000 + Math.floor(Math.random() * 240 * 1000)
@@ -78,6 +89,11 @@ export function useEmptyProvider({
   }, [startTime, lastActivity, timeoutModifier, setTooLong, setShowMessage])
 
   useEffect(() => {
+    const startDiff = startTime.valueOf() - new Date(lastActivity).valueOf()
+    console.log(startDiff)
+    if (startDiff > 2 * 60 * 1000 * timeoutModifier) {
+      navigate({ to: '/' + DONT_LEAVE_PATH })
+    }
     if (!timeoutId) {
       const id = setTimeout(afkMessage, 300 * 1000 * timeoutModifier)
       setTimeoutId(id)
@@ -90,7 +106,7 @@ export function useEmptyProvider({
 
   const setupSwap = useCallback(() => {
     setSwapPage(false)
-    const next = gamePaths[Math.floor(Math.random() * gamePaths.length)]
+    const next = gamePaths[Math.floor(Math.random() * randomPaths.length)]
     setNextPage(next)
     setTimeout(
       () => {

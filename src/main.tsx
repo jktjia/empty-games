@@ -15,6 +15,10 @@ import BaseLayout from './layouts/base-layout.tsx'
 import GameLayout from './layouts/game-layout.tsx'
 import MergeGame from './pages/merge-game.tsx'
 import Minesweeper from './pages/minesweeper.tsx'
+import FeedMe from './pages/feed-me.tsx'
+import TextLayout from './layouts/text-layout.tsx'
+import { DONT_LEAVE_PATH, FEED_ME_PATH, MINESWEEPER_PATH } from './lib/paths.ts'
+import Stay from './pages/stay.tsx'
 
 const rootRoute = createRootRoute({
   component: BaseLayout,
@@ -26,6 +30,12 @@ const gameRoute = createRoute({
   component: GameLayout,
 })
 
+const textRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'text',
+  component: TextLayout,
+})
+
 const indexRoute = createRoute({
   getParentRoute: () => gameRoute,
   path: '/',
@@ -34,12 +44,25 @@ const indexRoute = createRoute({
 
 const mineRoute = createRoute({
   getParentRoute: () => gameRoute,
-  path: 'minesweeper',
+  path: MINESWEEPER_PATH,
   component: Minesweeper,
+})
+
+const feedRoute = createRoute({
+  getParentRoute: () => textRoute,
+  path: FEED_ME_PATH,
+  component: FeedMe,
+})
+
+const stayRoute = createRoute({
+  getParentRoute: () => textRoute,
+  path: DONT_LEAVE_PATH,
+  component: Stay,
 })
 
 const routeTree = rootRoute.addChildren([
   gameRoute.addChildren([indexRoute, mineRoute]),
+  textRoute.addChildren([feedRoute, stayRoute]),
 ])
 
 const router = createRouter({
@@ -64,7 +87,7 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <RouterProvider router={router} />
-      <Toaster position="top-center" />
+      <Toaster position="top-right" richColors />
     </StrictMode>,
   )
 }
