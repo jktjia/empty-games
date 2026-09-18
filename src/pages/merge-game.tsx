@@ -46,15 +46,15 @@ export default function MergeGame() {
   return (
     <GameContent
       gameOverMessage="Game Over!"
-      isGameOver={isGameOver}
+      isGameOver={isGameOver()}
       restart={restart}
       scoreText={`Score: ${score}`}
       resetFocus={focusGrid}
     >
       <div
         className={cn(
-          'grid grid-cols-4 gap-2 transition-all text-xl w-full p-2',
-          isGameOver ? ' opacity-50' : '',
+          'grid grid-cols-4 gap-2 transition-all text-xl w-full',
+          isGameOver() ? ' opacity-50' : '',
         )}
         onKeyDown={handleKeyDown}
         tabIndex={0}

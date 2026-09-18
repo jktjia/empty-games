@@ -38,7 +38,7 @@ export default function GameContent({
 }) {
   return (
     <>
-      <CardHeader className="text-xl font-semibold flex flex-row gap-1">
+      <CardHeader className="text-lg font-semibold flex flex-row gap-1">
         <Button
           variant="secondary"
           onClick={() => {

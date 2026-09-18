@@ -8,6 +8,7 @@ export function useInterfere({
     down,
     left,
     right,
+    isGameOver,
     getLastMoveTime,
     getLastMove,
 }: {
@@ -15,6 +16,7 @@ export function useInterfere({
     down: () => void
     left: () => void
     right: () => void
+    isGameOver: () => boolean
     getLastMoveTime: () => Date
     getLastMove: () => Direction | undefined
 }) {
@@ -30,12 +32,14 @@ export function useInterfere({
         Direction.LEFT,
         Direction.RIGHT,
     ]
+
     const dirStrMap = new Map<Direction, string>([
         [Direction.UP, 'up'],
         [Direction.DOWN, 'down'],
         [Direction.LEFT, 'left'],
         [Direction.RIGHT, 'right'],
     ])
+
     const dirActMap = useMemo(
         () =>
             new Map<Direction, () => void>([
@@ -52,7 +56,7 @@ export function useInterfere({
             if (notifiyTime < getLastMoveTime()) {
                 if (getLastMove() == dir) {
                     toast(`Just like that!`, {
-                        description: "See, I have great suggestions",
+                        description: 'See, I have great suggestions',
                     })
                 } else {
                     toast.warning(`Stop that!`, {
@@ -78,29 +82,42 @@ export function useInterfere({
         notifiyTime,
         setInterfereCount,
         getLastMoveTime,
-        getLastMove
+        getLastMove,
     ])
 
     useEffect(() => {
         if (notifyNow && dir != undefined) {
-            const str = dirStrMap.get(dir)
-            console.log(str)
-            toast.info(`Have you thought about going ${str}?`, {
-                description: 'Could be fun',
-            })
-            setNotifyTime(new Date())
+            if (isGameOver()) {
+                toast.info("Let's play again!", {
+                    description: 'You should restart',
+                })
+                setInterfereCount(inferfereCount + 1)
+            } else {
+                const str = dirStrMap.get(dir)
+                console.log(str)
+                toast.info(`Have you thought about going ${str}?`, {
+                    description: 'Could be fun',
+                })
+                setNotifyTime(new Date())
 
-            setTimeout(
-                () => {
-                    console.log('interfere')
-                    setInterfereNow(true)
-                },
-                25 * 100 * timeoutModifier,
-            )
-
+                setTimeout(
+                    () => {
+                        console.log('interfere')
+                        setInterfereNow(true)
+                    },
+                    25 * 100 * timeoutModifier,
+                )
+            }
             setNotifyNow(false)
         }
-    }, [dir, notifyNow, setNotifyTime, setInterfereNow])
+    }, [
+        dir,
+        notifyNow,
+        isGameOver,
+        setInterfereCount,
+        setNotifyTime,
+        setInterfereNow,
+    ])
 
     useEffect(() => {
         const newDir = directions[Math.floor(Math.random() * directions.length)]
@@ -111,7 +128,7 @@ export function useInterfere({
                 console.log('notify')
                 setNotifyNow(true)
             },
-            10 * 1000 * timeoutModifier * Math.ceil(Math.random() * 5),
+            60 * 1000 * timeoutModifier * Math.ceil(Math.random() * 5),
         )
 
         return () => clearTimeout(timeout)

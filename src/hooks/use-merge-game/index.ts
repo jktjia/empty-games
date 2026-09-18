@@ -11,8 +11,8 @@ import {
   slideUp,
 } from './helpers'
 import { useInterfere } from './use-interfere'
-import type {MergeSpace} from '@/lib/types';
-import { Direction  } from '@/lib/types'
+import type { MergeSpace } from '@/lib/types'
+import { Direction } from '@/lib/types'
 import { decrypt, encrypt } from '@/lib/utils'
 
 interface MergeGameState {
@@ -43,7 +43,7 @@ export default function useMergeGame() {
     localStorage.setItem('merge-game', strState)
   }
 
-  const isGameOver = useMemo(() => {
+  const isGameLost = useMemo(() => {
     let gameOver = emptyTiles(tiles) == 0
     gameOver = gameOver && sameTiles(tiles, slideUp(tiles)[0])
     gameOver = gameOver && sameTiles(tiles, slideDown(tiles)[0])
@@ -58,9 +58,13 @@ export default function useMergeGame() {
     )
   }, [continueWin, tiles])
 
+  const isGameOver = useCallback(() => {
+    return isGameLost || isGameWon
+  }, [isGameLost, isGameWon])
+
   const update = useCallback(
     (newTiles: MergeSpace[][], s: number, id: number) => {
-      if (!isGameOver && !isGameWon) {
+      if (!isGameOver()) {
         startTransition(() => {
           setScore((old) => old + s)
           setTiles((t) => {
@@ -83,7 +87,7 @@ export default function useMergeGame() {
         })
       }
     },
-    [setScore, setTurns, setTiles, continueWin, setLastMoveTime],
+    [isGameOver, setScore, setTurns, setTiles, continueWin, setLastMoveTime],
   )
 
   const up = () => {
@@ -135,7 +139,15 @@ export default function useMergeGame() {
     return lastMove
   }, [lastMoveTime])
 
-  useInterfere({ up, down, left, right, getLastMoveTime, getLastMove })
+  useInterfere({
+    up,
+    down,
+    left,
+    right,
+    isGameOver,
+    getLastMoveTime,
+    getLastMove,
+  })
 
   return {
     tiles,
