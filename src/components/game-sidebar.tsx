@@ -11,6 +11,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { MINESWEEPER_PATH, TETRIS_PATH } from '@/utils/paths'
 
@@ -27,6 +28,8 @@ const gameOptions: GameOption[] = [
 ]
 
 export function GameSidebar() {
+  const { toggleSidebar } = useSidebar()
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -37,7 +40,7 @@ export function GameSidebar() {
           <SidebarGroupLabel>Games</SidebarGroupLabel>
           <SidebarMenu>
             {gameOptions.map((g) => (
-              <SidebarMenuButton key={g.name}>
+              <SidebarMenuButton key={g.name} onClick={toggleSidebar}>
                 <Link to={g.href} className="flex flex-row gap-2 items-center">
                   <g.icon size={20} />
                   {g.name}
