@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Bomb, Grid2X2 } from 'lucide-react'
+import { Blocks, Bomb, Grid2X2 } from 'lucide-react'
 import { GameSidebarTrigger } from './game-sidebar-trigger'
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -12,7 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
-import { MINESWEEPER_PATH } from '@/lib/paths'
+import { MINESWEEPER_PATH, TETRIS_PATH } from '@/lib/paths'
 
 interface GameOption {
   name: string
@@ -23,6 +23,7 @@ interface GameOption {
 const gameOptions: GameOption[] = [
   { name: '2048', href: '/', icon: Grid2X2 },
   { name: 'Minesweeper', href: '/' + MINESWEEPER_PATH, icon: Bomb },
+  { name: 'Tetris', href: '/' + TETRIS_PATH, icon: Blocks },
 ]
 
 export function GameSidebar() {

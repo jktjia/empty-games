@@ -33,23 +33,21 @@ export function useInterfere({
     Direction.RIGHT,
   ]
 
-  const dirStrMap = new Map<Direction, string>([
-    [Direction.UP, 'up'],
-    [Direction.DOWN, 'down'],
-    [Direction.LEFT, 'left'],
-    [Direction.RIGHT, 'right'],
-  ])
+  const dirStrs = {
+    [Direction.UP]: 'up',
+    [Direction.DOWN]: 'down',
+    [Direction.LEFT]: 'left',
+    [Direction.RIGHT]: 'right',
+  }
 
-  const dirActMap = useMemo(
-    () =>
-      new Map<Direction, () => void>([
-        [Direction.UP, up],
-        [Direction.DOWN, down],
-        [Direction.LEFT, left],
-        [Direction.RIGHT, right],
-      ]),
-    [up, down, left, right],
-  )
+  const dirActs = useMemo(() => {
+    return {
+      [Direction.UP]: up,
+      [Direction.DOWN]: down,
+      [Direction.LEFT]: left,
+      [Direction.RIGHT]: right,
+    }
+  }, [up, down, left, right])
 
   useEffect(() => {
     if (interfereNow && dir != undefined) {
@@ -64,7 +62,7 @@ export function useInterfere({
           })
         }
       } else {
-        const action = dirActMap.get(dir)
+        const action = dirActs[dir]
         action && action()
 
         toast.info(`Like this`, {
@@ -78,7 +76,7 @@ export function useInterfere({
   }, [
     interfereNow,
     dir,
-    dirActMap,
+    dirActs,
     notifiyTime,
     setInterfereCount,
     getLastMoveTime,
@@ -93,7 +91,7 @@ export function useInterfere({
         })
         setInterfereCount(inferfereCount + 1)
       } else {
-        const str = dirStrMap.get(dir)
+        const str = dirStrs[dir]
         console.log(str)
         toast.info(`Have you thought about going ${str}?`, {
           description: 'Could be fun',

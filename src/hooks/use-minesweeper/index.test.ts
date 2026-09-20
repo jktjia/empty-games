@@ -147,7 +147,7 @@ test('mine init small', () => {
 // )
 
 test('tile init', () => {
-  const { result } = renderHook(() => useMinesweeper({}))
+  const { result } = renderHook(() => useMinesweeper())
 
   expect(result.current.tiles.length).toBe(16)
   expect(result.current.tiles.every((r) => r.length == 30)).toBeTruthy()
@@ -607,7 +607,15 @@ test('uses local storage if applicable', () => {
   const width = 4
   const height = 4
   const count = 6
-  const encrypted = encrypt(JSON.stringify({ mines: mines, tiles: tiles, width, height, mineCount: count }))
+  const encrypted = encrypt(
+    JSON.stringify({
+      mines: mines,
+      tiles: tiles,
+      width,
+      height,
+      mineCount: count,
+    }),
+  )
   localStorage.setItem('minesweeper', encrypted)
   const { result } = renderHook(() =>
     useMinesweeper({

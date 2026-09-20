@@ -12,11 +12,13 @@ interface MinesweeperState {
   mineCount: number
 }
 
-export default function useMinesweeper({
-  width = 30,
-  height = 16,
-  mineCount = 99,
-}: MinesweeperSettings) {
+export default function useMinesweeper(
+  { width, height, mineCount }: MinesweeperSettings = {
+    width: 30,
+    height: 16,
+    mineCount: 99,
+  },
+) {
   const [mines, setMines] = useState<number[][] | undefined>(() => {
     const localMines = localStorage.getItem('minesweeper')
     const matchingSettings =
