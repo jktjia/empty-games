@@ -11,7 +11,7 @@ import {
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 import { Label } from './ui/label'
 import type { ReactNode } from 'react'
-import { Difficulty } from '@/lib/types'
+import { Difficulty } from '@/utils/types'
 
 export default function GameContent({
   gameName,

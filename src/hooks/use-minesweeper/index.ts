@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { initMines, initTiles, revealTile } from './helpers'
-import type { MinesweeperSettings } from '@/lib/types'
-import { MineTileState } from '@/lib/types'
-import { decrypt, encrypt } from '@/lib/utils'
+import type { MinesweeperSettings } from '@/utils/types'
+import { MineTileState } from '@/utils/types'
+import { decrypt, encrypt } from '@/utils'
 
 interface MinesweeperState {
   mines?: number[][]

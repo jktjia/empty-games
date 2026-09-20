@@ -2,13 +2,13 @@ import { Bomb, FlagTriangleRight, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '../components/ui/button'
 import type { ReactNode } from 'react'
-import type { MinesweeperSettings } from '@/lib/types'
+import type { MinesweeperSettings } from '@/utils/types'
 import useEmptyContext from '@/hooks/use-empty-context'
 import useMinesweeper from '@/hooks/use-minesweeper'
-import { Difficulty, MineTileState } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { Difficulty, MineTileState } from '@/utils/types'
+import { cn } from '@/utils'
 import GameContent from '@/components/game-content'
-import { gradient } from '@/lib/colors'
+import { gradient } from '@/utils/colors'
 
 interface ColsSettings extends MinesweeperSettings {
   gridCols: string

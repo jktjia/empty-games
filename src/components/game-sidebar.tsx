@@ -12,7 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
-import { MINESWEEPER_PATH, TETRIS_PATH } from '@/lib/paths'
+import { MINESWEEPER_PATH, TETRIS_PATH } from '@/utils/paths'
 
 interface GameOption {
   name: string
@@ -37,7 +37,7 @@ export function GameSidebar() {
           <SidebarGroupLabel>Games</SidebarGroupLabel>
           <SidebarMenu>
             {gameOptions.map((g) => (
-              <SidebarMenuButton>
+              <SidebarMenuButton key={g.name}>
                 <Link to={g.href} className="flex flex-row gap-2 items-center">
                   <g.icon size={20} />
                   {g.name}

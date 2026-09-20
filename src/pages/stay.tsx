@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useStay } from '@/hooks/use-stay'
-import { stayBtnText, stayResponseText } from '@/lib/messages'
+import { stayBtnText, stayResponseText } from '@/utils/messages'
 
 export default function Stay() {
   const { apologies, btnPresses, setBtnPresses } = useStay()

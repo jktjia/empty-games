@@ -22,7 +22,7 @@ import {
   FEED_ME_PATH,
   MINESWEEPER_PATH,
   TETRIS_PATH,
-} from './lib/paths.ts'
+} from './utils/paths.ts'
 import Stay from './pages/stay.tsx'
 import Tetris from './pages/tetris.tsx'
 

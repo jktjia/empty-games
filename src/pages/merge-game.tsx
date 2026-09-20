@@ -2,8 +2,8 @@ import { ViewTransition, useCallback, useEffect, useRef } from 'react'
 import useMergeGame from '@/hooks/use-merge-game'
 import useEmptyContext from '@/hooks/use-empty-context'
 import GameContent from '@/components/game-content'
-import { gradient } from '@/lib/colors'
-import { cn } from '@/lib/utils'
+import { gradient } from '@/utils/colors'
+import { cn } from '@/utils'
 import { Button } from '@/components/ui/button'
 
 export default function MergeGame() {

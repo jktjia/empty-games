@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { gradient } from '@/lib/colors'
-import { TetrisBlock } from '@/lib/types'
+import { gradient } from '@/utils/colors'
+import { TetrisBlock } from '@/utils/types'
 import useEmptyContext from '@/hooks/use-empty-context'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils'
 import GameContent from '@/components/game-content'
 import useTetris, { blockMatrices } from '@/hooks/use-tetris'
 
@@ -95,6 +95,8 @@ export default function Tetris() {
     hardDown,
     setSoftDown,
     restart,
+    paused,
+    togglePause,
   } = useTetris(defaultSettings)
 
   const splitMessage = useMemo(
@@ -115,6 +117,8 @@ export default function Tetris() {
       hold()
     } else if (e.key === 'ArrowDown') {
       setSoftDown(true)
+    } else if (e.key === 'Escape') {
+      togglePause()
     }
     updateActivity()
   }
@@ -159,6 +163,7 @@ export default function Tetris() {
         <div
           className={cn(
             'grid gap-1 transition-all max-h-full min-h-max',
+            // 'grid-cols-10',
             'grid-cols-' + defaultSettings.width,
             'grid-rows-' + defaultSettings.height,
             //   isGameOver() ? 'opacity-50' : '',
@@ -168,9 +173,12 @@ export default function Tetris() {
             r.map((t, idx) => {
               let className = blockBaseCN
               let content: ReactNode = <></>
-              if (t != null) {
+              if (t != null && !paused) {
                 className = cn(className, blockColors[t])
-              } else if (ghost.some(({ x, y }) => y == i && x == idx)) {
+              } else if (
+                ghost.some(({ x, y }) => y == i && x == idx) &&
+                !paused
+              ) {
                 className = cn(
                   className,
                   'bg-muted-foreground opacity-50 shadow-lg',
@@ -193,12 +201,17 @@ export default function Tetris() {
         <div className="flex flex-col gap-4">
           Next
           <div>
-            {next.map((n, idx) => (
+            {next.slice(0, 3).map((n, idx) => (
               <BlockMatrix block={n} keyPrefix={`next-${idx}`} key={idx} />
             ))}
           </div>
         </div>
       </div>
+      {paused && (
+        <div className="absolute w-full h-full flex items-center justify-center">
+          <div className="bg-background/50 rounded p-2 w-fit">Paused</div>
+        </div>
+      )}
     </GameContent>
   )
 }

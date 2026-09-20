@@ -1,4 +1,4 @@
-import { MineTileState } from '@/lib/types'
+import { MineTileState } from '@/utils/types'
 
 export function revealTile(
   x: number,

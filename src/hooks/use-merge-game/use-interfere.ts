@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { timeoutModifier } from '../use-empty-context'
-import { Direction } from '@/lib/types'
+import { Direction } from '@/utils/types'
 
 export function useInterfere({
   up,
@@ -63,7 +63,7 @@ export function useInterfere({
         }
       } else {
         const action = dirActs[dir]
-        action && action()
+        action()
 
         toast.info(`Like this`, {
           description: 'I moved it for you',

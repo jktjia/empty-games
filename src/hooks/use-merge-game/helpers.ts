@@ -1,4 +1,4 @@
-import type { MergeSpace, MergeTile } from '@/lib/types'
+import type { MergeSpace, MergeTile } from '@/utils/types'
 
 export function sameTiles(t1: MergeSpace[][], t2: MergeSpace[][]): boolean {
   // if (!validTiles(t1) || !validTiles(t2)) {

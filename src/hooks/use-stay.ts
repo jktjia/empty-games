@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { staySorryMessage } from '@/lib/messages'
+import { staySorryMessage } from '@/utils/messages'
 
 export function useStay() {
   const [apologies, setApologies] = useState<string>('')

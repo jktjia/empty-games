@@ -11,9 +11,9 @@ import {
   slideUp,
 } from './helpers'
 import { useInterfere } from './use-interfere'
-import type { MergeSpace } from '@/lib/types'
-import { Direction } from '@/lib/types'
-import { decrypt, encrypt } from '@/lib/utils'
+import type { MergeSpace } from '@/utils/types'
+import { Direction } from '@/utils/types'
+import { decrypt, encrypt } from '@/utils'
 
 interface MergeGameState {
   score: number

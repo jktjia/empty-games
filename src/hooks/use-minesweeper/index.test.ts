@@ -2,8 +2,8 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import * as helperMod from './helpers'
 import useMinesweeper from '.'
-import { MineTileState } from '@/lib/types'
-import { decrypt, encrypt } from '@/lib/utils'
+import { MineTileState } from '@/utils/types'
+import { decrypt, encrypt } from '@/utils'
 
 afterEach(() => {
   localStorage.clear()
