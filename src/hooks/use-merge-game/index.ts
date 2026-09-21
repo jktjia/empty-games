@@ -10,9 +10,9 @@ import {
   slideRight,
   slideUp,
 } from './helpers'
-import { useInterfere } from './use-interfere'
-import type { MergeSpace } from '@/utils/types'
-import { Direction } from '@/utils/types'
+import { useMergeInterfere } from './use-interfere'
+import type { MergeSpace } from '@/types'
+import { Direction } from '@/types'
 import { decrypt, encrypt } from '@/utils'
 
 interface MergeGameState {
@@ -124,7 +124,6 @@ export default function useMergeGame() {
     setScore(0)
     setContinueWin(false)
     updateLocal({ tiles: newTiles, score: 0, continue: false })
-    console.log(turns)
   }, [setTiles, setScore, turns])
 
   const continueGame = useCallback(() => {
@@ -139,7 +138,7 @@ export default function useMergeGame() {
     return lastMove
   }, [lastMoveTime])
 
-  useInterfere({
+  useMergeInterfere({
     up,
     down,
     left,

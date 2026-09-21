@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import * as helperMod from './helpers'
-import { TetrisBlock } from '@/utils/types'
+import { TetrisBlock } from '@/types'
 
 test('initTiles creates empty 10x20', () => {
   const result = helperMod.initTiles()

@@ -3,6 +3,7 @@ import {
   canMoveDown,
   canMoveLeft,
   canMoveRight,
+  checkLocalOrDefault,
   clearRows,
   currentValid,
   ghostCoords,
@@ -12,10 +13,13 @@ import {
   randomBag,
   randomBlock,
   rotateSRSKick,
+  shiftLeft,
+  shiftRight,
 } from './helpers'
-import type { TetrisSpace, WidthHeightSettings } from '@/utils/types'
-import { TetrisBlock } from '@/utils/types'
-import { decrypt, encrypt } from '@/utils'
+import { blockMatrices, rowsClearedPerLevel, scoreRowsCleared } from './consts'
+import { useTetrisInterfere } from './use-interfere'
+import type { TetrisBlock, TetrisSpace, WidthHeightSettings } from '@/types'
+import { encrypt } from '@/utils'
 
 interface TetrisState {
   tiles: TetrisSpace[][]
@@ -28,65 +32,6 @@ interface TetrisState {
   width: number
   height: number
   score: number
-}
-
-export const blockMatrices = {
-  [TetrisBlock.T]: [
-    [false, true, false],
-    [true, true, true],
-    [false, false, false],
-  ],
-  [TetrisBlock.I]: [
-    [false, false, false, false, false],
-    [false, false, false, false, false],
-    [false, true, true, true, true],
-    [false, false, false, false, false],
-    [false, false, false, false, false],
-  ],
-  [TetrisBlock.J]: [
-    [true, false, false],
-    [true, true, true],
-    [false, false, false],
-  ],
-  [TetrisBlock.L]: [
-    [false, false, true],
-    [true, true, true],
-    [false, false, false],
-  ],
-  [TetrisBlock.S]: [
-    [false, true, true],
-    [true, true, false],
-    [false, false, false],
-  ],
-  [TetrisBlock.Z]: [
-    [true, true, false],
-    [false, true, true],
-    [false, false, false],
-  ],
-  [TetrisBlock.O]: [
-    [false, true, true],
-    [false, true, true],
-    [false, false, false],
-  ],
-}
-
-const scoreRowsCleared = [0, 100, 300, 500, 800]
-const rowsClearedPerLevel = 10
-
-function checkLocalOrDefault<X>(
-  key: string,
-  defaultVal: X,
-  width: number,
-  height: number,
-) {
-  const localTiles = localStorage.getItem('tetris')
-  const matchingSettings =
-    localTiles &&
-    JSON.parse(decrypt(localTiles))['width'] == width &&
-    JSON.parse(decrypt(localTiles))['height'] == height
-  return localTiles && matchingSettings
-    ? JSON.parse(decrypt(localTiles))[key]
-    : defaultVal
 }
 
 export default function useTetris(
@@ -121,8 +66,10 @@ export default function useTetris(
   const [paused, setPaused] = useState<boolean>(false)
   const [updateNow, setUpdateNow] = useState<boolean>(false)
   const [ticker, setTicker] = useState<number>(0)
+  const [tickModifier, setTickModifier] = useState<number>(1)
   const [rowsCleared, setRowsCleared] = useState<number>(0)
-  const [isGameLost, setGameLost] = useState<boolean>(false)
+  const [isGameOver, setGameLost] = useState<boolean>(false)
+  const [holdPossible, setHoldPossible] = useState<boolean>(true)
 
   useEffect(() => {
     const state: TetrisState = {
@@ -166,7 +113,7 @@ export default function useTetris(
   ])
 
   const left = useCallback(() => {
-    if (!isGameLost && !paused) {
+    if (!isGameOver && !paused) {
       setCurrX((x) => {
         if (canMoveLeft(tiles, current, x, currY)) {
           return x - 1
@@ -175,10 +122,10 @@ export default function useTetris(
         }
       })
     }
-  }, [isGameLost, paused, setCurrX, tiles, current, currY])
+  }, [isGameOver, paused, setCurrX, tiles, current, currY])
 
   const right = useCallback(() => {
-    if (!isGameLost && !paused) {
+    if (!isGameOver && !paused) {
       setCurrX((x) => {
         if (canMoveRight(tiles, current, x, currY)) {
           return x + 1
@@ -187,7 +134,7 @@ export default function useTetris(
         }
       })
     }
-  }, [isGameLost, paused, setCurrX, tiles, current, currY])
+  }, [isGameOver, paused, setCurrX, tiles, current, currY])
 
   const updateNext = useCallback(() => {
     setNext((n) => {
@@ -201,7 +148,10 @@ export default function useTetris(
   }, [setNext])
 
   const hold = useCallback(() => {
-    if (!isGameLost && !paused) {
+    if (!isGameOver && !paused && holdPossible) {
+      setCurrX(width / 2 - 1)
+      setCurrY(0)
+      setHoldPossible(false)
       if (held != undefined) {
         setCurrent(blockMatrices[held])
         setCurrBlock((c) => {
@@ -218,10 +168,21 @@ export default function useTetris(
         updateNext()
       }
     }
-  }, [isGameLost, paused, setHeld, setCurrent, setCurrBlock, next, updateNext])
+  }, [
+    isGameOver,
+    paused,
+    setHeld,
+    setCurrent,
+    setCurrBlock,
+    next,
+    updateNext,
+    holdPossible,
+    setCurrX,
+    setCurrY,
+  ])
 
   const rotate = useCallback(() => {
-    if (!isGameLost && !paused) {
+    if (!isGameOver && !paused) {
       const { rotated, x, y } = rotateSRSKick(
         tiles,
         current,
@@ -233,9 +194,10 @@ export default function useTetris(
       setCurrX(x)
       setCurrY(y)
     }
-  }, [isGameLost, paused, tiles, current, currX, currY])
+  }, [isGameOver, paused, tiles, current, currX, currY])
 
   const newBlock = useCallback(() => {
+    setHoldPossible(true)
     const newCurr = next[0]
     setCurrent(blockMatrices[newCurr])
     setCurrBlock(newCurr)
@@ -258,7 +220,7 @@ export default function useTetris(
   }, [setTiles, current, currX, currY, currBlock, newBlock])
 
   const hardDown = useCallback(() => {
-    if (!isGameLost && !paused) {
+    if (!isGameOver && !paused) {
       const newY = ghostLocation(tiles, current, currX, currY)
       const updated = clearRows(
         placeCurrent(tiles, current, currX, newY, currBlock),
@@ -273,14 +235,14 @@ export default function useTetris(
       setRowsCleared((r) => r + updated.rowsCleared)
       newBlock()
     }
-  }, [isGameLost, paused, setTiles, current, currX, currY, currBlock, newBlock])
+  }, [isGameOver, paused, setTiles, current, currX, currY, currBlock, newBlock])
 
   const visibleTiles = useMemo(() => {
     return placeCurrent(tiles, current, currX, currY, currBlock)
   }, [tiles, current, currX, currY, currBlock])
 
   useEffect(() => {
-    if (updateNow && !isGameLost && !paused) {
+    if (updateNow && !isGameOver && !paused) {
       if (canMoveDown(tiles, current, currX, currY)) {
         setCurrY((y) => y + 1)
         if (softDown) {
@@ -295,7 +257,7 @@ export default function useTetris(
     }
   }, [
     updateNow,
-    isGameLost,
+    isGameOver,
     paused,
     setTimeout,
     tiles,
@@ -306,7 +268,7 @@ export default function useTetris(
   ])
 
   useEffect(() => {
-    let tickTime = 1000 * Math.pow(0.8, level)
+    let tickTime = (1000 * Math.pow(0.8, level)) / tickModifier
     if (softDown) {
       tickTime = tickTime / 5
     }
@@ -320,7 +282,7 @@ export default function useTetris(
   const ghost = useMemo(() => {
     const g = ghostCoords(tiles, current, currX, currY)
     return g
-  }, [tiles, current, currX])
+  }, [tiles, current, currX, currY])
 
   const level = useMemo(
     () => Math.floor(rowsCleared / rowsClearedPerLevel),
@@ -331,6 +293,27 @@ export default function useTetris(
     setPaused((p) => !p)
   }, [setPaused])
 
+  const shiftAllLeft = useCallback(() => {
+    setTiles((t) => shiftLeft(t))
+  }, [setTiles])
+
+  const shiftAllRight = useCallback(() => {
+    setTiles((t) => shiftRight(t))
+  }, [setTiles])
+
+  useTetrisInterfere({
+    isGameOver,
+    restart,
+    hardDown,
+    hold,
+    paused,
+    togglePause,
+    shiftAllLeft,
+    shiftAllRight,
+    tickModifier,
+    setTickModifier,
+  })
+
   return {
     visibleTiles,
     held,
@@ -338,7 +321,7 @@ export default function useTetris(
     ghost,
     level,
     score,
-    isGameLost,
+    isGameOver,
     left,
     right,
     hold,

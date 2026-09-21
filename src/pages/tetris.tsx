@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { gradient } from '@/utils/colors'
-import { TetrisBlock } from '@/utils/types'
+import { TetrisBlock } from '@/types'
 import useEmptyContext from '@/hooks/use-empty-context'
 import { cn } from '@/utils'
 import GameContent from '@/components/game-content'
-import useTetris, { blockMatrices } from '@/hooks/use-tetris'
+import useTetris from '@/hooks/use-tetris'
+import { blockMatrices } from '@/hooks/use-tetris/consts'
 
 const blockColors = {
   [TetrisBlock.T]: gradient[0],
@@ -87,7 +88,7 @@ export default function Tetris() {
     ghost,
     level,
     score,
-    isGameLost,
+    isGameOver,
     left,
     right,
     hold,
@@ -141,7 +142,7 @@ export default function Tetris() {
   return (
     <GameContent
       gameOverMessage={'You Lost!'}
-      isGameOver={isGameLost}
+      isGameOver={isGameOver}
       restart={restart}
       // gameName="Minesweeper"
       // rules="minesweeper rules here"
@@ -163,10 +164,8 @@ export default function Tetris() {
         <div
           className={cn(
             'grid gap-1 transition-all max-h-full min-h-max',
-            // 'grid-cols-10',
             'grid-cols-' + defaultSettings.width,
             'grid-rows-' + defaultSettings.height,
-            //   isGameOver() ? 'opacity-50' : '',
           )}
         >
           {visibleTiles.flatMap((r, i) =>
@@ -206,12 +205,12 @@ export default function Tetris() {
             ))}
           </div>
         </div>
+        {paused && (
+          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+            <div className="bg-background/50 rounded p-2 w-fit">Paused</div>
+          </div>
+        )}
       </div>
-      {paused && (
-        <div className="absolute w-full h-full flex items-center justify-center">
-          <div className="bg-background/50 rounded p-2 w-fit">Paused</div>
-        </div>
-      )}
     </GameContent>
   )
 }

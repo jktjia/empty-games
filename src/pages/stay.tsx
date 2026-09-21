@@ -18,7 +18,7 @@ export default function Stay() {
     <div className="flex flex-col pb-24">
       <div className="pb-8 text-5xl text-red-500 ">
         {btnPresses == 0
-          ? apologies.split('\n').map((a) => <p>{a}</p>)
+          ? apologies.split('\n').map((a, idx) => <p key={idx}>{a}</p>)
           : stayResponseText[btnPresses - 1]}
       </div>
       <Button

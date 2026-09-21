@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { initMines, initTiles, revealTile } from './helpers'
-import type { MinesweeperSettings } from '@/utils/types'
-import { MineTileState } from '@/utils/types'
+import type { MinesweeperSettings } from '@/types'
+import { MineTileState } from '@/types'
 import { decrypt, encrypt } from '@/utils'
 
 interface MinesweeperState {

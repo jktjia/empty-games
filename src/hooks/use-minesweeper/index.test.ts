@@ -2,7 +2,7 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import * as helperMod from './helpers'
 import useMinesweeper from '.'
-import { MineTileState } from '@/utils/types'
+import { MineTileState } from '@/types'
 import { decrypt, encrypt } from '@/utils'
 
 afterEach(() => {

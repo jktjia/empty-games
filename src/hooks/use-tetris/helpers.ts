@@ -1,8 +1,9 @@
-import { blockMatrices } from '.'
-import type { TetrisSpace } from '@/utils/types'
-import { Direction, TetrisBlock } from '@/utils/types'
+import { blockMatrices, iOffsets, oOffsets, offsets } from './consts'
+import type { TetrisSpace } from '@/types'
+import { Direction, TetrisBlock } from '@/types'
+import { decrypt } from '@/utils'
 
-export function sameTiles<X>(t1: X[][], t2: X[][]): boolean {
+export function sameTiles<T>(t1: T[][], t2: T[][]): boolean {
   let same = true
   for (let i = 0; i < t1.length; i++) {
     for (let j = 0; j < t1[i].length; j++) {
@@ -25,75 +26,6 @@ export function initTiles(
   }
   return baseTiles
 }
-
-const offsets = [
-  [
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-  ],
-  [
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: -1 },
-    { x: 0, y: 2 },
-    { x: 1, y: 2 },
-  ],
-  [
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-  ],
-  [
-    { x: 0, y: 0 },
-    { x: -1, y: 0 },
-    { x: -1, y: -1 },
-    { x: 0, y: 2 },
-    { x: -1, y: 2 },
-  ],
-]
-
-const iOffsets = [
-  [
-    { x: 0, y: 0 },
-    { x: -1, y: 0 },
-    { x: 2, y: 0 },
-    { x: -1, y: 0 },
-    { x: 2, y: 0 },
-  ],
-  [
-    { x: -1, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { x: 0, y: 1 },
-    { x: 0, y: -2 },
-  ],
-  [
-    { x: -1, y: 1 },
-    { x: 1, y: 1 },
-    { x: -2, y: 1 },
-    { x: 1, y: 0 },
-    { x: -2, y: 0 },
-  ],
-  [
-    { x: 0, y: 1 },
-    { x: 0, y: 1 },
-    { x: 0, y: 1 },
-    { x: 0, y: -1 },
-    { x: 0, y: 2 },
-  ],
-]
-
-const oOffsets = [
-  [{ x: 0, y: 0 }],
-  [{ x: 0, y: -1 }],
-  [{ x: -1, y: -1 }],
-  [{ x: -1, y: 0 }],
-]
 
 function rotateMatrix(current: boolean[][]) {
   return current.map((row, i) =>
@@ -346,4 +278,44 @@ export function clearRows(tiles: TetrisSpace[][]) {
     rows++
   }
   return { tiles: newTiles, rowsCleared: rows }
+}
+
+export function shiftLeft(tiles: TetrisSpace[][]) {
+  const newTiles: TetrisSpace[][] = []
+  for (const row of tiles) {
+    const newRow = [
+      ...row.filter((t) => t != null),
+      ...row.filter((t) => t == null),
+    ]
+    newTiles.push(newRow)
+  }
+  return newTiles
+}
+
+export function shiftRight(tiles: TetrisSpace[][]) {
+  const newTiles: TetrisSpace[][] = []
+  for (const row of tiles) {
+    const newRow = [
+      ...row.filter((t) => t == null),
+      ...row.filter((t) => t != null),
+    ]
+    newTiles.push(newRow)
+  }
+  return newTiles
+}
+
+export function checkLocalOrDefault<T>(
+  key: string,
+  defaultVal: T,
+  width: number,
+  height: number,
+) {
+  const localTiles = localStorage.getItem('tetris')
+  const matchingSettings =
+    localTiles &&
+    JSON.parse(decrypt(localTiles))['width'] == width &&
+    JSON.parse(decrypt(localTiles))['height'] == height
+  return localTiles && matchingSettings
+    ? JSON.parse(decrypt(localTiles))[key]
+    : defaultVal
 }

@@ -1,8 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 import type { UseNavigateResult } from '@tanstack/react-router'
 import { EmptyContext } from '@/components/providers/empty-provider'
-import { abandonedMessages, boredMessages } from '@/utils/messages'
+import { boredMessages } from '@/utils/messages'
 import { DONT_LEAVE_PATH, FEED_ME_PATH, MINESWEEPER_PATH } from '@/utils/paths'
 import { decrypt, encrypt } from '@/utils'
 

@@ -32,7 +32,7 @@ export function GameSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="flex flex-row justify-start">
         <GameSidebarTrigger />
       </SidebarHeader>
       <SidebarContent>

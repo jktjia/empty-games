@@ -1,4 +1,4 @@
-import type { MergeSpace, MergeTile } from '@/utils/types'
+import type { MergeSpace, MergeTile } from '@/types'
 
 export function sameTiles(t1: MergeSpace[][], t2: MergeSpace[][]): boolean {
   // if (!validTiles(t1) || !validTiles(t2)) {
@@ -185,7 +185,3 @@ export function nextId(tiles: MergeSpace[][]): number {
   }
   return id
 }
-
-// function validTiles(tiles: number[][]): boolean {
-//     return tiles.length == 4 && tiles.every(r => r.length == 4)
-// }

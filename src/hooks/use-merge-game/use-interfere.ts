@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { timeoutModifier } from '../use-empty-context'
-import { Direction } from '@/utils/types'
+import { useCallback, useMemo, useState } from 'react'
+import { useInterfere } from '../use-interfere'
+import type { InterfereAction } from '@/types'
+import { Direction, ToastVariant } from '@/types'
 
-export function useInterfere({
+export function useMergeInterfere({
   up,
   down,
   left,
@@ -20,115 +20,80 @@ export function useInterfere({
   getLastMoveTime: () => Date
   getLastMove: () => Direction | undefined
 }) {
-  const [inferfereCount, setInterfereCount] = useState<number>(0)
-  const [notifyNow, setNotifyNow] = useState<boolean>(false)
-  const [interfereNow, setInterfereNow] = useState<boolean>(false)
-  const [dir, setDir] = useState<Direction>()
   const [notifiyTime, setNotifyTime] = useState<Date>(new Date())
 
-  const directions = [
-    Direction.UP,
-    Direction.DOWN,
-    Direction.LEFT,
-    Direction.RIGHT,
+  const moveOpts = useMemo(
+    () => [
+      {
+        dir: Direction.UP,
+        str: 'up',
+        act: up,
+      },
+      {
+        dir: Direction.DOWN,
+        str: 'down',
+        act: down,
+      },
+      {
+        dir: Direction.LEFT,
+        str: 'left',
+        act: left,
+      },
+      {
+        dir: Direction.RIGHT,
+        str: 'right',
+        act: right,
+      },
+    ],
+    [up, down, left, right],
+  )
+
+  const actions: InterfereAction[] = [
+    {
+      actionPossible: useMemo(() => isGameOver(), [isGameOver]),
+      afterToast: {
+        message: "Let's play again!",
+        desc: 'You should restart',
+        variant: ToastVariant.BASE,
+      },
+    },
+    ...moveOpts.map((m) => {
+      return {
+        actionPossible: useMemo(() => !isGameOver(), [isGameOver]),
+        beforeToast: {
+          message: `Have you thought about going ${m.str}?`,
+          desc: 'Could be fun',
+          variant: ToastVariant.INFO,
+        },
+        action: useCallback(() => {
+          if (notifiyTime >= getLastMoveTime()) {
+            m.act()
+          }
+        }, [notifiyTime, getLastMoveTime]),
+        afterToast: useMemo(
+          () =>
+            notifiyTime >= getLastMoveTime()
+              ? {
+                  message: 'Like this',
+                  desc: 'I moved it for you',
+                  variant: ToastVariant.INFO,
+                }
+              : getLastMove() == m.dir
+                ? {
+                    message: 'Just like that!',
+                    desc: 'See, I have great suggestions',
+                    variant: ToastVariant.SUCCESS,
+                  }
+                : {
+                    message: 'Stop that!',
+                    desc: "That's not what I suggested",
+                    variant: ToastVariant.ERROR,
+                  },
+          [notifiyTime, getLastMoveTime, getLastMove],
+        ),
+      }
+    }),
   ]
 
-  const dirStrs = {
-    [Direction.UP]: 'up',
-    [Direction.DOWN]: 'down',
-    [Direction.LEFT]: 'left',
-    [Direction.RIGHT]: 'right',
-  }
-
-  const dirActs = useMemo(() => {
-    return {
-      [Direction.UP]: up,
-      [Direction.DOWN]: down,
-      [Direction.LEFT]: left,
-      [Direction.RIGHT]: right,
-    }
-  }, [up, down, left, right])
-
-  useEffect(() => {
-    if (interfereNow && dir != undefined) {
-      if (notifiyTime < getLastMoveTime()) {
-        if (getLastMove() == dir) {
-          toast(`Just like that!`, {
-            description: 'See, I have great suggestions',
-          })
-        } else {
-          toast.warning(`Stop that!`, {
-            description: "That's not what I suggested",
-          })
-        }
-      } else {
-        const action = dirActs[dir]
-        action()
-
-        toast.info(`Like this`, {
-          description: 'I moved it for you',
-        })
-      }
-
-      setInterfereNow(false)
-      setInterfereCount(inferfereCount + 1)
-    }
-  }, [
-    interfereNow,
-    dir,
-    dirActs,
-    notifiyTime,
-    setInterfereCount,
-    getLastMoveTime,
-    getLastMove,
-  ])
-
-  useEffect(() => {
-    if (notifyNow && dir != undefined) {
-      if (isGameOver()) {
-        toast.info("Let's play again!", {
-          description: 'You should restart',
-        })
-        setInterfereCount(inferfereCount + 1)
-      } else {
-        const str = dirStrs[dir]
-        console.log(str)
-        toast.info(`Have you thought about going ${str}?`, {
-          description: 'Could be fun',
-        })
-        setNotifyTime(new Date())
-
-        setTimeout(
-          () => {
-            console.log('interfere')
-            setInterfereNow(true)
-          },
-          25 * 100 * timeoutModifier,
-        )
-      }
-      setNotifyNow(false)
-    }
-  }, [
-    dir,
-    notifyNow,
-    isGameOver,
-    setInterfereCount,
-    setNotifyTime,
-    setInterfereNow,
-  ])
-
-  useEffect(() => {
-    const newDir = directions[Math.floor(Math.random() * directions.length)]
-    setDir(newDir)
-
-    const timeout = setTimeout(
-      () => {
-        console.log('notify')
-        setNotifyNow(true)
-      },
-      60 * 1000 * timeoutModifier * Math.ceil(Math.random() * 5),
-    )
-
-    return () => clearTimeout(timeout)
-  }, [inferfereCount, setNotifyNow])
+  useInterfere({ actions, setNotifyTime })
 }
