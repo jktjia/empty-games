@@ -16,22 +16,31 @@ import GameLayout from './layouts/game-layout.tsx'
 import MergeGame from './pages/merge-game.tsx'
 import Minesweeper from './pages/minesweeper.tsx'
 import FeedMe from './pages/feed-me.tsx'
-import TextLayout from './layouts/text-layout.tsx'
+import TextLayout from './layouts/secret-layout.tsx'
 import {
   DONT_LEAVE_PATH,
   FEED_ME_PATH,
   MINESWEEPER_PATH,
+  SETTINGS_PATH,
   TETRIS_PATH,
 } from './utils/paths.ts'
 import Stay from './pages/stay.tsx'
 import Tetris from './pages/tetris.tsx'
+import MainLayout from './layouts/main-layout.tsx'
+import Settings from './pages/settings.tsx'
 
 const rootRoute = createRootRoute({
   component: BaseLayout,
 })
 
-const gameRoute = createRoute({
+const mainRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: 'main',
+  component: MainLayout,
+})
+
+const gameRoute = createRoute({
+  getParentRoute: () => mainRoute,
   id: 'game',
   component: GameLayout,
 })
@@ -60,6 +69,12 @@ const tetrisRoute = createRoute({
   component: Tetris,
 })
 
+const settingsRoute = createRoute({
+  getParentRoute: () => mainRoute,
+  path: SETTINGS_PATH,
+  component: Settings,
+})
+
 const feedRoute = createRoute({
   getParentRoute: () => textRoute,
   path: FEED_ME_PATH,
@@ -73,7 +88,10 @@ const stayRoute = createRoute({
 })
 
 const routeTree = rootRoute.addChildren([
-  gameRoute.addChildren([indexRoute, mineRoute, tetrisRoute]),
+  mainRoute.addChildren([
+    settingsRoute,
+    gameRoute.addChildren([indexRoute, mineRoute, tetrisRoute]),
+  ]),
   textRoute.addChildren([feedRoute, stayRoute]),
 ])
 
