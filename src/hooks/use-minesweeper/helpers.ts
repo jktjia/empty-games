@@ -13,6 +13,25 @@ export function revealTile(
   return dup
 }
 
+export function revealNeighbors(
+  x: number,
+  y: number,
+  height: number,
+  width: number,
+  mines: number[][],
+  tiles: MineTileState[][],
+): MineTileState[][] {
+  const dup = JSON.parse(JSON.stringify(tiles))
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (x + j >= 0 && x + j < width && y + i >= 0 && y + i < height) {
+        recursiveReveal(x + j, y + i, height, width, mines, dup)
+      }
+    }
+  }
+  return dup
+}
+
 function recursiveReveal(
   x: number,
   y: number,

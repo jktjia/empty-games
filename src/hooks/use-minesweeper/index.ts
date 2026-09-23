@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { initMines, initTiles, revealTile } from './helpers'
+import { initMines, initTiles, revealNeighbors, revealTile } from './helpers'
 import type { MinesweeperSettings } from '@/types'
 import { MineTileState } from '@/types'
 import { decrypt, encrypt } from '@/utils'
@@ -89,10 +89,26 @@ export default function useMinesweeper(
           tiles[y][x] = MineTileState.FLAG
           setTurns((t) => t + 1)
         }
+        updateLocal({ mines: mines, tiles: tiles, width, height, mineCount })
       }
-      updateLocal({ mines: mines, tiles: tiles, width, height, mineCount })
     },
     [width, height, mineCount, mines, tiles, setTurns, updateLocal],
+  )
+
+  const flagOrRevealNeighbors = useCallback((x: number, y: number) => {
+    if (mines) {
+      const current = tiles[y][x]
+      if (mines && current == MineTileState.SEEN) {
+        const newTiles = revealNeighbors(x, y, height, width, mines, tiles)
+        setTiles(newTiles)
+        setTurns((t) => t + 1)
+        updateLocal({ mines: mines, tiles: newTiles, width, height, mineCount })
+      } else {
+        flag(x, y)
+      }
+    }
+  },
+    [width, height, mineCount, mines, tiles, setTurns, updateLocal, flag],
   )
 
   const reveal = useCallback(
@@ -154,6 +170,7 @@ export default function useMinesweeper(
     tiles,
     flag,
     reveal,
+    flagOrRevealNeighbors,
     restart,
     remaining,
     isGameLost,

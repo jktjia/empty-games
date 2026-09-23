@@ -15,7 +15,7 @@ import { Difficulty } from '@/types'
 
 export default function GameContent({
   gameName,
-  rules,
+  controls,
   scoreText,
   restart,
   isGameOver,
@@ -26,7 +26,7 @@ export default function GameContent({
   children,
 }: {
   gameName?: string
-  rules?: string
+  controls?: string
   scoreText?: string
   restart: () => void
   isGameOver?: boolean
@@ -87,17 +87,19 @@ export default function GameContent({
             </DialogContent>
           </Dialog>
         )}
-        {rules && (
+        {controls && (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="link">Rules</Button>
+              <Button variant="link">Controls</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Rules</DialogTitle>
+                <DialogTitle>Controls</DialogTitle>
                 {gameName && <DialogDescription>{gameName}</DialogDescription>}
               </DialogHeader>
-              {rules}
+              {controls.split('\n').map((str, idx) => (
+                <p key={idx}>{str}</p>
+              ))}
             </DialogContent>
           </Dialog>
         )}

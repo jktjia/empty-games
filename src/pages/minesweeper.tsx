@@ -1,5 +1,5 @@
 import { Bomb, FlagTriangleRight, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '../components/ui/button'
 import type { ReactNode } from 'react'
 import type { MinesweeperSettings } from '@/types'
@@ -35,15 +35,23 @@ const difficultySettings: Record<Difficulty, ColsSettings> = {
   },
 }
 
+const controls = `Left-click an empty square to reveal it.
+Right-click an empty square to flag it.
+Press space bar while hovering over a square to flag it or reveal its adjacent squares.
+Press F2 or click the restart button to start a new game`
+
 export default function Minesweeper() {
   const { updateActivity, message } = useEmptyContext()
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.EXPERT)
+  const [hoverX, setHoverX] = useState<number>()
+  const [hoverY, setHoverY] = useState<number>()
   const settings = useMemo(() => difficultySettings[difficulty], [difficulty])
   const {
     tiles,
     mines,
     reveal,
     flag,
+    flagOrRevealNeighbors,
     isGameLost,
     isGameOver,
     restart,
@@ -68,6 +76,36 @@ export default function Minesweeper() {
     updateActivity()
   }
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!isGameOver()) {
+        e.preventDefault()
+        if (e.key === ' ') {
+          if (hoverX != undefined && hoverY != undefined) {
+            flagOrRevealNeighbors(hoverX, hoverY)
+          }
+          updateActivity()
+        } else if (e.key === 'F2') {
+          restart()
+          updateActivity()
+        }
+      }
+    },
+    [isGameOver, hoverX, hoverY, restart, flagOrRevealNeighbors],
+  )
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleKeyDown])
+
+  useEffect(() => {
+    console.log(hoverX, ',', hoverY)
+  }, [hoverX, hoverY])
+
   const splitMessage = useMemo(
     () => (message ? message.toUpperCase().split('') : []),
     [message],
@@ -79,14 +117,14 @@ export default function Minesweeper() {
       isGameOver={isGameOver()}
       restart={restart}
       // gameName="Minesweeper"
-      // rules="minesweeper rules here"
+      controls={controls}
       difficulty={difficulty}
       setDifficulty={setDifficulty}
       scoreText={`Mines Remaining: ${remaining()}`}
     >
       <div
         className={cn(
-          'grid gap-1 transition-all max-h-full min-w-full',
+          'grid gap-1 transition-all max-h-full min-w-fit',
           difficultySettings[difficulty].gridCols,
           isGameOver() ? 'opacity-50' : '',
         )}
@@ -134,16 +172,27 @@ export default function Minesweeper() {
               }
             }
             return (
-              <Button
-                className={className}
-                size={'sm'}
-                key={'tile-' + i + '-' + idx}
-                onClick={(e) => handleClick(e, idx, i)}
-                onContextMenu={(e) => handleClick(e, idx, i)}
-                disabled={t == MineTileState.SEEN && !isGameOver()}
+              <div
+                onMouseEnter={() => {
+                  setHoverX(idx)
+                  setHoverY(i)
+                }}
+                onMouseLeave={() => {
+                  setHoverX(undefined)
+                  setHoverY(undefined)
+                }}
               >
-                {content}
-              </Button>
+                <Button
+                  className={className}
+                  size={'sm'}
+                  key={'tile-' + i + '-' + idx}
+                  onClick={(e) => handleClick(e, idx, i)}
+                  onContextMenu={(e) => handleClick(e, idx, i)}
+                  disabled={t == MineTileState.SEEN && !isGameOver()}
+                >
+                  {content}
+                </Button>
+              </div>
             )
           }),
         )}

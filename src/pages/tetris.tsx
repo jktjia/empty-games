@@ -18,6 +18,13 @@ const blockColors = {
   [TetrisBlock.Z]: gradient[13],
 }
 
+const controls = `Left and right arrow keys: Piece shifting
+Up arrow key: Rotating 90 degrees clockwise
+Down arrow key: Non-locking soft drop
+Space bar: Locking hard drop
+C key / Shift key: Hold piece`
+// Z key / Left Control key: Rotating 90 degrees counterclockwise`
+
 const defaultSettings = {
   width: 10,
   height: 20,
@@ -114,7 +121,7 @@ export default function Tetris() {
       left()
     } else if (e.key === 'ArrowRight') {
       right()
-    } else if (e.key === 'c') {
+    } else if (e.key === 'c' || e.key === 'Shift') {
       hold()
     } else if (e.key === 'ArrowDown') {
       setSoftDown(true)
@@ -145,7 +152,7 @@ export default function Tetris() {
       isGameOver={isGameOver}
       restart={restart}
       // gameName="Minesweeper"
-      // rules="minesweeper rules here"
+      controls={controls}
       scoreText={`Level: ${level}   Score: ${score}`}
       resetFocus={focusGrid}
     >
@@ -164,7 +171,7 @@ export default function Tetris() {
         <div
           className={cn(
             'grid gap-1 transition-all max-h-full min-h-max',
-            'grid-cols-' + defaultSettings.width,
+            'grid-cols-10',
             'grid-rows-' + defaultSettings.height,
           )}
         >

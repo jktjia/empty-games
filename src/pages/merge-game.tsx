@@ -6,6 +6,9 @@ import { gradient } from '@/utils/colors'
 import { cn } from '@/utils'
 import { Button } from '@/components/ui/button'
 
+const controls = `Use arrow keys to move the tiles.
+When two tiles having the same number touch, they join into one.`
+
 export default function MergeGame() {
   const { updateActivity } = useEmptyContext()
   const {
@@ -51,6 +54,7 @@ export default function MergeGame() {
       restart={restart}
       scoreText={`Score: ${score}`}
       resetFocus={focusGrid}
+      controls={controls}
     >
       <div
         className={cn(
@@ -89,7 +93,7 @@ export default function MergeGame() {
         <div className="absolute w-fit flex flex-col gap-2">
           <div className="bg-background/50 rounded p-2">Game Won!</div>
           <Button
-            className="bg-background/50 text-white"
+            className="bg-background/50 text-primary"
             onClick={continueGame}
           >
             Continue
