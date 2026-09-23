@@ -420,8 +420,9 @@ test('place current', () => {
     [null, null, null, TetrisBlock.O, TetrisBlock.O],
   ]
   const current = [
-    [false, false, false, false],
-    [true, true, true, true],
+    [false, false, false, false, false],
+    [false, false, false, false, false],
+    [false, true, true, true, true],
     [false, false, false, false],
     [false, false, false, false],
   ]
@@ -447,9 +448,10 @@ test('place current 2', () => {
     [null, null, null, null, null],
   ]
   const current = [
+    [false, false, false, false, false],
+    [false, false, false, false, false],
+    [false, true, true, true, true],
     [false, false, false, false],
-    [false, false, false, false],
-    [true, true, true, true],
     [false, false, false, false],
   ]
   const final = [
@@ -460,7 +462,7 @@ test('place current 2', () => {
     [TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, null],
   ]
 
-  const result = helperMod.placeCurrent(initial, current, 1, 3, TetrisBlock.I)
+  const result = helperMod.placeCurrent(initial, current, 1, 4, TetrisBlock.I)
 
   expect(result).toStrictEqual(final)
 })

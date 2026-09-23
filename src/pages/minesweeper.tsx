@@ -113,14 +113,14 @@ export default function Minesweeper() {
 
   return (
     <GameContent
-      gameOverMessage={isGameLost() ? 'You Lost!' : 'You Won!'}
+      gameOverMessage={isGameLost ? 'You Lost!' : 'You Won!'}
       isGameOver={isGameOver}
       restart={restart}
       // gameName="Minesweeper"
       controls={controls}
       difficulty={difficulty}
       setDifficulty={setDifficulty}
-      scoreText={`Mines Remaining: ${remaining()}`}
+      scoreText={`Mines Remaining: ${remaining}`}
     >
       <div
         className={cn(
@@ -141,7 +141,7 @@ export default function Minesweeper() {
                 className,
                 'bg-muted-foreground opacity-50 shadow-lg',
               )
-              if (isGameLost() && mines && mines[i][idx] == -1) {
+              if (isGameLost && mines && mines[i][idx] == -1) {
                 content = <Bomb className="text-accent" />
               } else if (message) {
                 content =
@@ -152,7 +152,7 @@ export default function Minesweeper() {
                 className,
                 'bg-muted-foreground opacity-50 shadow-lg',
               )
-              if (isGameLost() && mines[i][idx] != -1) {
+              if (isGameLost && mines[i][idx] != -1) {
                 content = <X className="text-accent" />
               } else {
                 content = <FlagTriangleRight className="text-accent" />

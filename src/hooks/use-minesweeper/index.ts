@@ -76,7 +76,6 @@ export default function useMinesweeper(
     const newTiles = initTiles(width, height)
     setTiles(newTiles)
     updateLocal({ mines: undefined, tiles: newTiles, width, height, mineCount })
-    console.log(turns)
   }, [width, height, mineCount, setMines, setTiles, updateLocal, turns])
 
   const flag = useCallback(
@@ -100,7 +99,7 @@ export default function useMinesweeper(
     (x: number, y: number) => {
       if (mines) {
         const current = tiles[y][x]
-        if (mines && current == MineTileState.SEEN) {
+        if (current == MineTileState.SEEN) {
           const newTiles = revealNeighbors(x, y, height, width, mines, tiles)
           setTiles(newTiles)
           setTurns((t) => t + 1)
@@ -144,14 +143,14 @@ export default function useMinesweeper(
     [height, width, mineCount, mines, tiles, setTiles, setTurns, updateLocal],
   )
 
-  const remaining = useCallback(() => {
+  const remaining = useMemo(() => {
     return (
       mineCount -
       tiles.flatMap((t) => t).filter((t) => t == MineTileState.FLAG).length
     )
   }, [mineCount, tiles])
 
-  const isGameLost = useCallback(() => {
+  const isGameLost = useMemo(() => {
     return (
       mines &&
       tiles.some((r, i) =>
@@ -160,8 +159,8 @@ export default function useMinesweeper(
     )
   }, [mines, tiles])
 
-  const isGameWon = useCallback(() => {
-    let gameWon = remaining() == 0
+  const isGameWon = useMemo(() => {
+    let gameWon = remaining == 0
     gameWon =
       gameWon &&
       tiles.flatMap((t) => t).filter((t) => t == MineTileState.NOT_SEEN)
@@ -170,7 +169,7 @@ export default function useMinesweeper(
   }, [remaining, tiles])
 
   const isGameOver = useMemo(
-    () => isGameLost() || isGameWon(),
+    () => isGameLost || isGameWon,
     [isGameLost, isGameWon],
   )
 

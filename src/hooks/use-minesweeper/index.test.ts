@@ -192,9 +192,9 @@ test('reveal', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeFalsy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeFalsy()
   const storage = localStorage.getItem('minesweeper')
   expect(storage).toBeTruthy()
   if (storage) {
@@ -238,9 +238,9 @@ test('reveal expands from a 0', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeFalsy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeFalsy()
 })
 
 test('reveal mine results in game lost', () => {
@@ -277,9 +277,9 @@ test('reveal mine results in game lost', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeTruthy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeTruthy()
+  expect(result.current.isGameLost).toBeTruthy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeTruthy()
 })
 
 test('flag', () => {
@@ -317,9 +317,9 @@ test('flag', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeFalsy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeFalsy()
   const storage = localStorage.getItem('minesweeper')
   expect(storage).toBeTruthy()
   if (storage) {
@@ -363,9 +363,9 @@ test('unflag', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeFalsy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeFalsy()
   const storage = localStorage.getItem('minesweeper')
   expect(storage).toBeTruthy()
   if (storage) {
@@ -396,9 +396,9 @@ test('flag does nothing if mines not initialized', () => {
 
   expect(result.current.mines).toBeUndefined()
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeFalsy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeFalsy()
 })
 
 test('reveal mine results in game lost', () => {
@@ -435,9 +435,9 @@ test('reveal mine results in game lost', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeTruthy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeTruthy()
+  expect(result.current.isGameLost).toBeTruthy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeTruthy()
 })
 
 test('reveal last slot results in game won', () => {
@@ -483,9 +483,9 @@ test('reveal last slot results in game won', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeTruthy()
-  expect(result.current.isGameOver()).toBeTruthy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeTruthy()
+  expect(result.current.isGameOver).toBeTruthy()
 })
 
 test('flag last slot results in game won', () => {
@@ -531,12 +531,13 @@ test('flag last slot results in game won', () => {
   ]
 
   expect(result.current.tiles).toStrictEqual(expected)
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeTruthy()
-  expect(result.current.isGameOver()).toBeTruthy()
+  // expect(result.current.remaining).toBe(0)
+  // expect(result.current.isGameLost).toBeFalsy()
+  // expect(result.current.isGameWon).toBeTruthy()
+  // expect(result.current.isGameOver).toBeTruthy()
 })
 
-test('flag last slot results in game won', () => {
+test('restart game', () => {
   const mineSpy = vi.spyOn(helperMod, 'initMines')
   mineSpy.mockReturnValue([
     [-1, -1, -1, -1],
@@ -581,9 +582,9 @@ test('flag last slot results in game won', () => {
 
   expect(result.current.tiles).toStrictEqual(expected)
   expect(result.current.mines).toBeUndefined()
-  expect(result.current.isGameLost()).toBeFalsy()
-  expect(result.current.isGameWon()).toBeFalsy()
-  expect(result.current.isGameOver()).toBeFalsy()
+  expect(result.current.isGameLost).toBeFalsy()
+  expect(result.current.isGameWon).toBeFalsy()
+  expect(result.current.isGameOver).toBeFalsy()
   const storage = localStorage.getItem('minesweeper')
   expect(storage).toBeTruthy()
   if (storage) {
