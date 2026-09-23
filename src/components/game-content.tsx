@@ -22,6 +22,7 @@ export default function GameContent({
   difficulty,
   setDifficulty,
   gameOverMessage,
+  announcement,
   resetFocus,
   children,
 }: {
@@ -33,6 +34,7 @@ export default function GameContent({
   difficulty?: Difficulty
   setDifficulty?: (d: Difficulty) => void
   gameOverMessage?: string
+  announcement?: string
   resetFocus?: () => void
   children?: ReactNode
 }) {
@@ -111,6 +113,13 @@ export default function GameContent({
           {isGameOver && (
             <div className="absolute w-fit bg-background/50 rounded p-2">
               {gameOverMessage}
+            </div>
+          )}
+          {announcement && (
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+              <div className="bg-background/50 rounded p-2 w-fit">
+                {announcement}
+              </div>
             </div>
           )}
         </div>

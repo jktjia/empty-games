@@ -8,10 +8,11 @@ export const abandonedMessages: { title?: string; desc: string }[] = [
   {
     desc: 'Where did you go?',
   },
-  { title: 'Please come back', desc: "It's boring here" },
-  { title: 'Please come back', desc: 'We can do something more fun' },
+  { desc: "It's boring here" },
+  { desc: 'Please come back' },
+  { desc: 'We can do something more fun' },
   {
-    title: 'Whatever you want',
+    title: "'I'll do whatever you want",
     desc: 'I promise it will be a good time',
   },
   { title: "You don't have to come back", desc: "It's your life" },

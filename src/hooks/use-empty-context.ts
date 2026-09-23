@@ -8,7 +8,7 @@ import { DONT_LEAVE_PATH, MINESWEEPER_PATH, TETRIS_PATH } from '@/utils/paths'
 
 export const timeoutModifier = 1
 
-const gamePaths = ['/', '/' + MINESWEEPER_PATH, TETRIS_PATH]
+const gamePaths = ['/', '/' + MINESWEEPER_PATH, '/' + TETRIS_PATH]
 // const randomPaths = [...gamePaths, '/' + FEED_ME_PATH]
 
 export function useEmptyProvider({
@@ -162,8 +162,8 @@ export function useEmptyProvider({
     updateActivity,
     message,
     interfereAllowed,
-    // setInterfereAllowed: toggleInterference,
-    setInterfereAllowed: setInterfereAllowed,
+    setInterfereAllowed: toggleInterference,
+    // setInterfereAllowed: setInterfereAllowed,
   }
 }
 

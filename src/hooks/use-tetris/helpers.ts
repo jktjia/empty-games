@@ -1,7 +1,6 @@
 import { blockMatrices, iOffsets, oOffsets, offsets } from './consts'
 import type { TetrisSpace } from '@/types'
 import { Direction, TetrisBlock } from '@/types'
-import { decrypt } from '@/utils'
 
 export function sameTiles<T>(t1: T[][], t2: T[][]): boolean {
   let same = true
@@ -114,20 +113,6 @@ function canMoveDir(
     [Direction.RIGHT]: { x: 1, y: 0 },
   }
   return currentValid(tiles, current, x + moveDirs[dir].x, y + moveDirs[dir].y)
-}
-
-export function randomBlock() {
-  const blocks = [
-    TetrisBlock.I,
-    TetrisBlock.O,
-    TetrisBlock.T,
-    TetrisBlock.J,
-    TetrisBlock.L,
-    TetrisBlock.S,
-    TetrisBlock.Z,
-  ]
-
-  return blocks[Math.floor(Math.random() * blocks.length)]
 }
 
 export function randomBag() {
@@ -302,20 +287,4 @@ export function shiftRight(tiles: TetrisSpace[][]) {
     newTiles.push(newRow)
   }
   return newTiles
-}
-
-export function checkLocalOrDefault<T>(
-  key: string,
-  defaultVal: T,
-  width: number,
-  height: number,
-) {
-  const localTiles = localStorage.getItem('tetris')
-  const matchingSettings =
-    localTiles &&
-    JSON.parse(decrypt(localTiles))['width'] == width &&
-    JSON.parse(decrypt(localTiles))['height'] == height
-  return localTiles && matchingSettings
-    ? JSON.parse(decrypt(localTiles))[key]
-    : defaultVal
 }

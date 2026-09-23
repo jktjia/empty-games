@@ -41,6 +41,13 @@ export const blockMatrices = {
 }
 
 export const scoreRowsCleared = [0, 100, 300, 500, 800]
+export const labelRowsCleared = [
+  undefined,
+  'Single',
+  'Double',
+  'Triple',
+  'Tetris',
+]
 export const rowsClearedPerLevel = 10
 
 export const offsets = [

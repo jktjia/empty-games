@@ -105,6 +105,7 @@ export default function Tetris() {
     restart,
     paused,
     togglePause,
+    annoucement,
   } = useTetris(defaultSettings)
 
   const splitMessage = useMemo(
@@ -155,6 +156,7 @@ export default function Tetris() {
       controls={controls}
       scoreText={`Level: ${level}   Score: ${score}`}
       resetFocus={focusGrid}
+      announcement={paused ? 'Paused' : annoucement}
     >
       <div
         className="flex flex-row items-start gap-4 text-xl"
@@ -212,11 +214,6 @@ export default function Tetris() {
             ))}
           </div>
         </div>
-        {paused && (
-          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-            <div className="bg-background/50 rounded p-2 w-fit">Paused</div>
-          </div>
-        )}
       </div>
     </GameContent>
   )

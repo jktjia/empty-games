@@ -142,7 +142,7 @@ export function useInterfere({
   useEffect(() => {
     if (notifyNow && interfereAllowed) {
       const idx = randomNextAction(allActions)
-      console.log('action:', idx)
+      // console.log('action:', idx)
       setActIdx(idx)
 
       if (idx != undefined && allActions[idx].beforeToast) {
@@ -151,7 +151,7 @@ export function useInterfere({
           description: params.desc,
           action: params.action,
         })
-        console.log('notify:', new Date())
+        // console.log('notify:', new Date())
       }
       setNotifyTime(new Date())
 
@@ -175,7 +175,7 @@ export function useInterfere({
 
   useEffect(() => {
     if (interfereAllowed) {
-      console.log('interfere count:', inferfereCount)
+      // console.log('interfere count:', inferfereCount)
 
       const timeout = setTimeout(
         () => {
