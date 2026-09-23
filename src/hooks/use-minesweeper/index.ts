@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { initMines, initTiles, revealNeighbors, revealTile } from './helpers'
+import { useMinesweeperInterfere } from './use-interfere'
 import type { MinesweeperSettings } from '@/types'
 import { MineTileState } from '@/types'
 import { decrypt, encrypt } from '@/utils'
@@ -95,19 +96,26 @@ export default function useMinesweeper(
     [width, height, mineCount, mines, tiles, setTurns, updateLocal],
   )
 
-  const flagOrRevealNeighbors = useCallback((x: number, y: number) => {
-    if (mines) {
-      const current = tiles[y][x]
-      if (mines && current == MineTileState.SEEN) {
-        const newTiles = revealNeighbors(x, y, height, width, mines, tiles)
-        setTiles(newTiles)
-        setTurns((t) => t + 1)
-        updateLocal({ mines: mines, tiles: newTiles, width, height, mineCount })
-      } else {
-        flag(x, y)
+  const flagOrRevealNeighbors = useCallback(
+    (x: number, y: number) => {
+      if (mines) {
+        const current = tiles[y][x]
+        if (mines && current == MineTileState.SEEN) {
+          const newTiles = revealNeighbors(x, y, height, width, mines, tiles)
+          setTiles(newTiles)
+          setTurns((t) => t + 1)
+          updateLocal({
+            mines: mines,
+            tiles: newTiles,
+            width,
+            height,
+            mineCount,
+          })
+        } else {
+          flag(x, y)
+        }
       }
-    }
-  },
+    },
     [width, height, mineCount, mines, tiles, setTurns, updateLocal, flag],
   )
 
@@ -161,9 +169,12 @@ export default function useMinesweeper(
     return gameWon
   }, [remaining, tiles])
 
-  const isGameOver = useCallback(() => {
-    return isGameLost() || isGameWon()
-  }, [isGameLost, isGameWon])
+  const isGameOver = useMemo(
+    () => isGameLost() || isGameWon(),
+    [isGameLost, isGameWon],
+  )
+
+  useMinesweeperInterfere({ reveal, tiles, mines, restart, isGameOver })
 
   return {
     mines,

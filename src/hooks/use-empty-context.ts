@@ -1,14 +1,15 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import type { UseNavigateResult } from '@tanstack/react-router'
 import { EmptyContext } from '@/components/providers/empty-provider'
 import { boredMessages } from '@/utils/messages'
-import { DONT_LEAVE_PATH, FEED_ME_PATH, MINESWEEPER_PATH } from '@/utils/paths'
-import { decrypt, encrypt } from '@/utils'
+import { DONT_LEAVE_PATH, MINESWEEPER_PATH, TETRIS_PATH } from '@/utils/paths'
+// import { decrypt, encrypt } from '@/utils'
 
 export const timeoutModifier = 1
 
-const gamePaths = ['/', '/' + MINESWEEPER_PATH]
-const randomPaths = [...gamePaths, '/' + FEED_ME_PATH]
+const gamePaths = ['/', '/' + MINESWEEPER_PATH, TETRIS_PATH]
+// const randomPaths = [...gamePaths, '/' + FEED_ME_PATH]
 
 export function useEmptyProvider({
   navigate,
@@ -19,7 +20,9 @@ export function useEmptyProvider({
   const startTime = new Date()
   const [lastActivity, setLastActivity] = useState<Date>(() => {
     const localTime = localStorage.getItem('last-activity')
-    return localTime ? JSON.parse(decrypt(localTime)) : new Date()
+    // return localTime ? JSON.parse(decrypt(localTime)) : new Date()
+    // return localTime ? JSON.parse(localTime) : new Date()
+    return new Date()
   })
 
   const [tooLong, setTooLong] = useState<number>(-1)
@@ -31,16 +34,19 @@ export function useEmptyProvider({
   const [abandoned, setAbandoned] = useState<number>(0)
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>()
 
-  const updateLocal = (activity: Date) => {
-    const strActivity = encrypt(JSON.stringify(activity))
-    localStorage.setItem('last-activity', strActivity)
-  }
+  const [interfereAllowed, setInterfereAllowed] = useState<boolean>(true)
+
+  // const updateLocal = (activity: Date) => {
+  //   // const strActivity = encrypt(JSON.stringify(activity))
+  //   // localStorage.setItem('last-activity', strActivity)
+  //   localStorage.setItem('last-activity', JSON.stringify(activity))
+  // }
 
   const updateActivity = useCallback(() => {
     const now = new Date()
     setLastActivity(now)
     setAbandoned(0)
-    updateLocal(now)
+    // updateLocal(now)
   }, [setLastActivity, setAbandoned, timeoutId, setTimeoutId])
 
   const afkMessage = useCallback(() => {
@@ -90,7 +96,7 @@ export function useEmptyProvider({
   useEffect(() => {
     const startDiff = startTime.valueOf() - new Date(lastActivity).valueOf()
     console.log(startDiff)
-    if (startDiff > 2 * 60 * 1000 * timeoutModifier) {
+    if (startDiff > 20 * 60 * 1000 * timeoutModifier) {
       navigate({ to: '/' + DONT_LEAVE_PATH })
     }
     if (!timeoutId) {
@@ -105,7 +111,7 @@ export function useEmptyProvider({
 
   const setupSwap = useCallback(() => {
     setSwapPage(false)
-    const next = gamePaths[Math.floor(Math.random() * randomPaths.length)]
+    const next = gamePaths[Math.floor(Math.random() * gamePaths.length)]
     setNextPage(next)
     setTimeout(
       () => {
@@ -118,7 +124,7 @@ export function useEmptyProvider({
   useEffect(() => {
     if (swapPage) {
       setupSwap()
-      if (nextPage) {
+      if (nextPage && interfereAllowed) {
         navigate({ to: nextPage })
       }
     }
@@ -129,7 +135,36 @@ export function useEmptyProvider({
     [showMessage, boredMessages, tooLong],
   )
 
-  return { title, setTitle, lastActivity, updateActivity, message }
+  const toggleInterference = useCallback(
+    (b: boolean) => {
+      if (b) {
+        setInterfereAllowed(true)
+      } else {
+        setInterfereAllowed(false)
+        setTimeout(
+          () => {
+            setInterfereAllowed(true)
+            toast.info('I lived, bitch', {
+              description: "Thought you'd seen the last of me, didn't you?",
+            })
+          },
+          60 * 1000 * timeoutModifier * (5 + Math.ceil(Math.random() * 5)),
+        )
+      }
+    },
+    [setInterfereAllowed],
+  )
+
+  return {
+    title,
+    setTitle,
+    lastActivity,
+    updateActivity,
+    message,
+    interfereAllowed,
+    // setInterfereAllowed: toggleInterference,
+    setInterfereAllowed: setInterfereAllowed,
+  }
 }
 
 export default function useEmptyContext() {

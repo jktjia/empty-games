@@ -15,11 +15,11 @@ import BaseLayout from './layouts/base-layout.tsx'
 import GameLayout from './layouts/game-layout.tsx'
 import MergeGame from './pages/merge-game.tsx'
 import Minesweeper from './pages/minesweeper.tsx'
-import FeedMe from './pages/feed-me.tsx'
+// import FeedMe from './pages/feed-me.tsx'
 import TextLayout from './layouts/secret-layout.tsx'
 import {
   DONT_LEAVE_PATH,
-  FEED_ME_PATH,
+  // FEED_ME_PATH,
   MINESWEEPER_PATH,
   SETTINGS_PATH,
   TETRIS_PATH,
@@ -75,11 +75,11 @@ const settingsRoute = createRoute({
   component: Settings,
 })
 
-const feedRoute = createRoute({
-  getParentRoute: () => textRoute,
-  path: FEED_ME_PATH,
-  component: FeedMe,
-})
+// const feedRoute = createRoute({
+//   getParentRoute: () => textRoute,
+//   path: FEED_ME_PATH,
+//   component: FeedMe,
+// })
 
 const stayRoute = createRoute({
   getParentRoute: () => textRoute,
@@ -92,7 +92,8 @@ const routeTree = rootRoute.addChildren([
     settingsRoute,
     gameRoute.addChildren([indexRoute, mineRoute, tetrisRoute]),
   ]),
-  textRoute.addChildren([feedRoute, stayRoute]),
+  // textRoute.addChildren([feedRoute, stayRoute]),
+  textRoute.addChildren([stayRoute]),
 ])
 
 const router = createRouter({

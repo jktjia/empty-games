@@ -9,6 +9,7 @@ export function useMergeInterfere({
   left,
   right,
   isGameOver,
+  restart,
   getLastMoveTime,
   getLastMove,
 }: {
@@ -17,6 +18,7 @@ export function useMergeInterfere({
   left: () => void
   right: () => void
   isGameOver: () => boolean
+  restart: () => void
   getLastMoveTime: () => Date
   getLastMove: () => Direction | undefined
 }) {
@@ -52,14 +54,31 @@ export function useMergeInterfere({
     {
       actionPossible: useMemo(() => isGameOver(), [isGameOver]),
       afterToast: {
-        message: "Let's play again!",
-        desc: 'You should restart',
+        message: 'Press restart to begin a new game',
+        desc: "Let's play again!",
         variant: ToastVariant.BASE,
+      },
+    },
+    {
+      actionPossible: useMemo(() => isGameOver(), [isGameOver]),
+      beforeToast: {
+        message: 'Press restart to begin a new game',
+        desc: "Let's play again!",
+        variant: ToastVariant.BASE,
+      },
+      action: restart,
+      afterToast: {
+        message: 'Game restarted',
+        desc: 'Now we can keep playing!',
+        variant: ToastVariant.INFO,
       },
     },
     ...moveOpts.map((m) => {
       return {
-        actionPossible: useMemo(() => !isGameOver(), [isGameOver]),
+        actionPossible: useMemo(
+          () => !isGameOver() && getLastMove() != m.dir,
+          [isGameOver, getLastMove],
+        ),
         beforeToast: {
           message: `Have you thought about going ${m.str}?`,
           desc: 'Could be fun',

@@ -38,23 +38,23 @@ export function useTetrisInterfere({
     {
       actionPossible: isGameOver,
       afterToast: {
-        message: "Let's play again!",
-        desc: 'You should restart',
+        message: 'Press restart to begin a new game',
+        desc: "Let's play again!",
         variant: ToastVariant.BASE,
       },
     },
     {
       actionPossible: isGameOver,
       beforeToast: {
-        message: "Let's play again!",
-        desc: 'You should restart',
+        message: 'Press restart to begin a new game',
+        desc: "Let's play again!",
         variant: ToastVariant.BASE,
       },
       action: restart,
       afterToast: {
-        message: 'Now we can keep playing',
-        desc: 'I restarted it for you',
-        variant: ToastVariant.BASE,
+        message: 'Game restarted',
+        desc: 'Now we can keep playing!',
+        variant: ToastVariant.INFO,
       },
     },
     {
@@ -76,7 +76,7 @@ export function useTetrisInterfere({
       afterToast: {
         message: 'I unpaused it',
         desc: 'Now we can keep going!',
-        variant: ToastVariant.BASE,
+        variant: ToastVariant.INFO,
       },
     },
     {
@@ -85,13 +85,13 @@ export function useTetrisInterfere({
         [isGamePlaying, tickModifier],
       ),
       action: useCallback(() => {
-        setTickModifier(4)
+        setTickModifier(2.5)
 
         const timeout = setTimeout(
           () => {
             setTickModifier(1)
           },
-          30 * 1000 * timeoutModifier,
+          15 * 1000 * timeoutModifier,
         )
 
         return () => clearTimeout(timeout)

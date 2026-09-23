@@ -63,7 +63,7 @@ export default function Minesweeper() {
     x: number,
     y: number,
   ) => {
-    if (!isGameOver()) {
+    if (!isGameOver) {
       e.preventDefault()
       if (e.button === 0) {
         reveal(x, y)
@@ -78,7 +78,7 @@ export default function Minesweeper() {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (!isGameOver()) {
+      if (!isGameOver) {
         e.preventDefault()
         if (e.key === ' ') {
           if (hoverX != undefined && hoverY != undefined) {
@@ -114,7 +114,7 @@ export default function Minesweeper() {
   return (
     <GameContent
       gameOverMessage={isGameLost() ? 'You Lost!' : 'You Won!'}
-      isGameOver={isGameOver()}
+      isGameOver={isGameOver}
       restart={restart}
       // gameName="Minesweeper"
       controls={controls}
@@ -126,7 +126,7 @@ export default function Minesweeper() {
         className={cn(
           'grid gap-1 transition-all max-h-full min-w-fit',
           difficultySettings[difficulty].gridCols,
-          isGameOver() ? 'opacity-50' : '',
+          isGameOver ? 'opacity-50' : '',
         )}
       >
         {tiles.flatMap((r, i) =>
@@ -188,7 +188,7 @@ export default function Minesweeper() {
                   key={'tile-' + i + '-' + idx}
                   onClick={(e) => handleClick(e, idx, i)}
                   onContextMenu={(e) => handleClick(e, idx, i)}
-                  disabled={t == MineTileState.SEEN && !isGameOver()}
+                  disabled={t == MineTileState.SEEN && !isGameOver}
                 >
                   {content}
                 </Button>

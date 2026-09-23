@@ -9,6 +9,8 @@ interface EmptyContextType {
   lastActivity: Date
   updateActivity: () => void
   message?: string
+  interfereAllowed: boolean
+  setInterfereAllowed: (b: boolean) => void
 }
 
 const EmptyContext = createContext<EmptyContextType>({
@@ -16,6 +18,8 @@ const EmptyContext = createContext<EmptyContextType>({
   setTitle: console.log,
   lastActivity: new Date(),
   updateActivity: () => console.log(new Date()),
+  interfereAllowed: false,
+  setInterfereAllowed: console.log,
 })
 
 export default function EmptyProvider({

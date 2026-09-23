@@ -144,6 +144,7 @@ export default function useMergeGame() {
     left,
     right,
     isGameOver,
+    restart,
     getLastMoveTime,
     getLastMove,
   })

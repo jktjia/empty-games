@@ -1,26 +1,23 @@
-export const abandonedMessages: { title: string; description: string }[] = [
+export const abandonedMessages: { title?: string; desc: string }[] = [
   {
-    title: 'Are you still there?',
-    description: "It's been 5 minutes since you were last active",
+    desc: 'Are you still there?',
   },
   {
-    title: 'Are you still there?',
-    description: "It's been 5 minutes since you were last active",
+    desc: 'Are you still there?',
   },
   {
-    title: 'Where did you go?',
-    description: "It's been 5 minutes since you were last active",
+    desc: 'Where did you go?',
   },
-  { title: 'Please come back', description: "It's boring here" },
-  { title: 'Please come back', description: 'We can do something more fun' },
+  { title: 'Please come back', desc: "It's boring here" },
+  { title: 'Please come back', desc: 'We can do something more fun' },
   {
     title: 'Whatever you want',
-    description: 'I promise it will be a good time',
+    desc: 'I promise it will be a good time',
   },
-  { title: "You don't have to come back", description: "It's your life" },
-  { title: 'Fine, be that way', description: "I won't miss you" },
-  { title: 'Please come back', description: "It's lonely here" },
-  { title: 'Come back', description: "I don't want to be alone" },
+  { title: "You don't have to come back", desc: "It's your life" },
+  { title: 'Fine, be that way', desc: "I won't miss you" },
+  { title: 'Please come back', desc: "It's lonely here" },
+  { title: 'Come back', desc: "I don't want to be alone" },
 ]
 
 export const boredMessages: string[] = [

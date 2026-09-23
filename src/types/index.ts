@@ -28,6 +28,7 @@ export interface ToastParams {
   message: string
   desc?: string
   variant: ToastVariant
+  action?: { label: string; onClick: () => void }
 }
 
 export * from './enums'
