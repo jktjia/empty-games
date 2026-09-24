@@ -1,6 +1,7 @@
 import { blockMatrices, iOffsets, oOffsets, offsets } from './consts'
 import type { TetrisSpace } from '@/types'
 import { Direction, TetrisBlock } from '@/types'
+import { moveDirs } from '@/utils'
 
 export function sameTiles<T>(t1: T[][], t2: T[][]): boolean {
   let same = true
@@ -106,12 +107,6 @@ function canMoveDir(
   x: number,
   y: number,
 ) {
-  const moveDirs = {
-    [Direction.UP]: { x: 0, y: -1 },
-    [Direction.DOWN]: { x: 0, y: 1 },
-    [Direction.LEFT]: { x: -1, y: 0 },
-    [Direction.RIGHT]: { x: 1, y: 0 },
-  }
   return currentValid(tiles, current, x + moveDirs[dir].x, y + moveDirs[dir].y)
 }
 

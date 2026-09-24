@@ -31,7 +31,7 @@ const defaultSettings = {
 }
 
 const blockBaseCN = cn(
-  'rounded flex items-center justify-center aspect-square p-0 m-0',
+  ' flex items-center justify-center aspect-square p-0 m-0',
   'max-w-full w-8 text-black text-sm ',
 )
 
@@ -87,7 +87,7 @@ function BlockMatrix({
 }
 
 export default function Tetris() {
-  const { updateActivity, message } = useEmptyContext()
+  const { updateActivity, wheatMessage } = useEmptyContext()
   const {
     visibleTiles,
     held,
@@ -109,8 +109,8 @@ export default function Tetris() {
   } = useTetris(defaultSettings)
 
   const splitMessage = useMemo(
-    () => (message ? message.toUpperCase().split('') : []),
-    [message],
+    () => (wheatMessage ? wheatMessage.toUpperCase().split('') : []),
+    [wheatMessage],
   )
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -194,7 +194,7 @@ export default function Tetris() {
               } else {
                 className = cn(className, blockEmptyCN)
               }
-              if (message) {
+              if (wheatMessage) {
                 content =
                   splitMessage[(i * r.length + idx) % splitMessage.length]
               }

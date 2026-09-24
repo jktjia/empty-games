@@ -71,7 +71,7 @@ export default function MergeGame() {
             t ? (
               <ViewTransition key={t.id + ''} name={t.id + ''}>
                 <div
-                  className={`rounded ${
+                  className={`${
                     gradient[Math.min(Math.log2(t.value), gradient.length)] +
                     ' shadow-lg text-black'
                   } aspect-square flex items-center justify-center`}
@@ -82,7 +82,7 @@ export default function MergeGame() {
               </ViewTransition>
             ) : (
               <div
-                className={`rounded bg-secondary text-gray-500 aspect-square flex items-center justify-center`}
+                className={`bg-secondary text-gray-500 aspect-square flex items-center justify-center`}
                 key={'tile-' + i + '-' + idx}
               />
             ),

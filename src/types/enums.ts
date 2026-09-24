@@ -34,3 +34,9 @@ export enum ToastVariant {
   WARNING,
   ERROR,
 }
+
+export enum SnakeTileState {
+  APPLE,
+  HEAD,
+  BODY,
+}

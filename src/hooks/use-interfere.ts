@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { useLocation, useNavigate } from '@tanstack/react-router'
 import useEmptyContext, { timeoutModifier } from './use-empty-context'
 import type { InterfereAction } from '@/types'
 import { ToastVariant } from '@/types'
 import { abandonedMessages } from '@/utils/messages'
+import { MINESWEEPER_PATH, SNAKE_PATH, TETRIS_PATH } from '@/utils/paths'
+
+const gamePaths = [
+  '/',
+  '/' + MINESWEEPER_PATH,
+  '/' + TETRIS_PATH,
+  '/' + SNAKE_PATH,
+]
 
 function randomNextAction(actions: InterfereAction[]) {
   const nDoable = actions.filter((a) => a.actionPossible).length
@@ -44,47 +53,14 @@ export function useInterfere({
   const [abandonedIdx, setAbandonedIdx] = useState<number>(0)
 
   const { interfereAllowed, lastActivity } = useEmptyContext()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const startTime = new Date()
+
+  const otherGamePaths = gamePaths.filter((p) => location.href != p)
 
   const baseActions: InterfereAction[] = [
-    // {
-    //   actionPossible: useMemo(
-    //     () =>
-    //       new Date().getTime() - lastActivity.getTime() >
-    //       2.5 * 60 * 1000 * timeoutModifier,
-    //     [lastActivity],
-    //   ),
-    //   afterToast: {
-    //     message: "Why aren't you doing anything?",
-    //     desc: 'Do you really want me to play for you?',
-    //     variant: ToastVariant.BASE,
-    //   },
-    // },
-    // {
-    //   actionPossible: useMemo(
-    //     () =>
-    //       new Date().getTime() - lastActivity.getTime() >
-    //       5 * 60 * 1000 * timeoutModifier,
-    //     [lastActivity],
-    //   ),
-    //   afterToast: {
-    //     message: 'Are you still there?',
-    //     desc: "It's no fun playing all by myself",
-    //     variant: ToastVariant.BASE,
-    //   },
-    // },
-    // {
-    //   actionPossible: useMemo(
-    //     () =>
-    //       new Date().getTime() - lastActivity.getTime() >
-    //       10 * 60 * 1000 * timeoutModifier,
-    //     [lastActivity],
-    //   ),
-    //   afterToast: {
-    //     message: 'Please come back',
-    //     variant: ToastVariant.BASE,
-    //   },
-    // },
-
     {
       actionPossible: useMemo(
         () =>
@@ -112,6 +88,23 @@ export function useInterfere({
           [abandonedIdx],
         ),
         variant: ToastVariant.BASE,
+      },
+    },
+    {
+      actionPossible: useMemo(
+        () =>
+          new Date().getTime() - startTime.getTime() >
+          5 * 60 * 1000 * timeoutModifier,
+        [lastActivity],
+      ),
+      action: () =>
+        navigate({
+          to: otherGamePaths[Math.floor(Math.random() * otherGamePaths.length)],
+        }),
+      afterToast: {
+        message: `Redirecting...`,
+        desc: "Let's play something different",
+        variant: ToastVariant.INFO,
       },
     },
   ]
@@ -151,7 +144,6 @@ export function useInterfere({
           description: params.desc,
           action: params.action,
         })
-        // console.log('notify:', new Date())
       }
       setNotifyTime(new Date())
 

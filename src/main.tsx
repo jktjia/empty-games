@@ -22,12 +22,14 @@ import {
   // FEED_ME_PATH,
   MINESWEEPER_PATH,
   SETTINGS_PATH,
+  SNAKE_PATH,
   TETRIS_PATH,
 } from './utils/paths.ts'
 import Stay from './pages/stay.tsx'
 import Tetris from './pages/tetris.tsx'
 import MainLayout from './layouts/main-layout.tsx'
 import Settings from './pages/settings.tsx'
+import Snake from './pages/snake.tsx'
 
 const rootRoute = createRootRoute({
   component: BaseLayout,
@@ -69,6 +71,12 @@ const tetrisRoute = createRoute({
   component: Tetris,
 })
 
+const snakeRoute = createRoute({
+  getParentRoute: () => gameRoute,
+  path: SNAKE_PATH,
+  component: Snake,
+})
+
 const settingsRoute = createRoute({
   getParentRoute: () => mainRoute,
   path: SETTINGS_PATH,
@@ -90,7 +98,7 @@ const stayRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   mainRoute.addChildren([
     settingsRoute,
-    gameRoute.addChildren([indexRoute, mineRoute, tetrisRoute]),
+    gameRoute.addChildren([indexRoute, mineRoute, tetrisRoute, snakeRoute]),
   ]),
   // textRoute.addChildren([feedRoute, stayRoute]),
   textRoute.addChildren([stayRoute]),

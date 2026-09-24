@@ -1,4 +1,4 @@
-import type { TetrisBlock, ToastVariant } from './enums'
+import type { SnakeTileState, TetrisBlock, ToastVariant } from './enums'
 
 export interface MergeTile {
   id: number
@@ -30,5 +30,12 @@ export interface ToastParams {
   variant: ToastVariant
   action?: { label: string; onClick: () => void }
 }
+
+export interface Coord {
+  x: number
+  y: number
+}
+
+export type SnakeSpace = SnakeTileState | null
 
 export * from './enums'

@@ -126,7 +126,6 @@ export default function useTetris(
     if (next.length < 3) {
       next = [...next, ...randomBag()]
     }
-    console.log(next)
     return { ...state, next: next }
   }
 

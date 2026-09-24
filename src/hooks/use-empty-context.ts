@@ -3,50 +3,42 @@ import { toast } from 'sonner'
 import type { UseNavigateResult } from '@tanstack/react-router'
 import { EmptyContext } from '@/components/providers/empty-provider'
 import { boredMessages } from '@/utils/messages'
-import { DONT_LEAVE_PATH, MINESWEEPER_PATH, TETRIS_PATH } from '@/utils/paths'
-// import { decrypt, encrypt } from '@/utils'
+import { DONT_LEAVE_PATH } from '@/utils/paths'
 
 export const timeoutModifier = 1
-
-const gamePaths = ['/', '/' + MINESWEEPER_PATH, '/' + TETRIS_PATH]
-// const randomPaths = [...gamePaths, '/' + FEED_ME_PATH]
 
 export function useEmptyProvider({
   navigate,
 }: {
   navigate: UseNavigateResult<string>
 }) {
-  const [title, setTitle] = useState<string>('A Website')
-  const startTime = new Date()
+  const [title, setTitle] = useState<string>('Cube Games')
   const [lastActivity, setLastActivity] = useState<Date>(() => {
     const localTime = localStorage.getItem('last-activity')
-    // return localTime ? JSON.parse(decrypt(localTime)) : new Date()
-    // return localTime ? JSON.parse(localTime) : new Date()
-    return new Date()
+    return localTime ? new Date(JSON.parse(localTime)) : new Date()
   })
 
-  const [tooLong, setTooLong] = useState<number>(-1)
+  // const [tooLong, setTooLong] = useState<number>(-1)
   const [showMessage, setShowMessage] = useState<boolean>(false)
-
-  const [nextPage, setNextPage] = useState<string>()
-  const [swapPage, setSwapPage] = useState<boolean>(true)
+  const [pokes, setPokes] = useState<number>(0)
 
   const [abandoned, setAbandoned] = useState<number>(0)
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>()
 
   const [interfereAllowed, setInterfereAllowed] = useState<boolean>(true)
+  const [ignoreCount, setIgnoreCount] = useState<number>(0)
 
-  // const updateLocal = (activity: Date) => {
-  //   // const strActivity = encrypt(JSON.stringify(activity))
-  //   // localStorage.setItem('last-activity', strActivity)
-  //   localStorage.setItem('last-activity', JSON.stringify(activity))
-  // }
+  const startTime = new Date()
+
+  const updateLocal = (activity: Date) => {
+    localStorage.setItem('last-activity', JSON.stringify(activity))
+  }
 
   const updateActivity = useCallback(() => {
     const now = new Date()
     setLastActivity(now)
     setAbandoned(0)
-    // updateLocal(now)
+    updateLocal(now)
   }, [setLastActivity, setAbandoned, timeoutId, setTimeoutId])
 
   const afkMessage = useCallback(() => {
@@ -83,56 +75,52 @@ export function useEmptyProvider({
     }
   }, [setAbandoned])
 
-  const poke = useCallback(() => {
-    const now = new Date()
-    const startDiff = now.valueOf() - startTime.valueOf()
-    const lastDiff = now.valueOf() - lastActivity.valueOf()
-    setTooLong(Math.floor(startDiff / (5 * 60 * 1000 * timeoutModifier)))
-    setShowMessage(true)
-    setTimeout(() => setShowMessage(false), 3 * 1000 * timeoutModifier)
-    setTimeout(poke, 5 * 60 * 1000 * timeoutModifier)
-  }, [startTime, lastActivity, timeoutModifier, setTooLong, setShowMessage])
+  // const poke = useCallback(() => {
+  //   const now = new Date()
+  //   const startDiff = now.valueOf() - startTime.valueOf()
+  //   const lastDiff = now.valueOf() - lastActivity.valueOf()
+  //   // setTooLong(Math.floor(startDiff / (5 * 60 * 1000 * timeoutModifier)))
+  //   setShowMessage(true)
+  //   setTimeout(() => setShowMessage(false), 2.5 * 1000 * timeoutModifier)
+  //   setTimeout(poke, 5 * 60 * 1000 * timeoutModifier)
+  // }, [startTime, lastActivity, timeoutModifier, setShowMessage])
 
   useEffect(() => {
-    const startDiff = startTime.valueOf() - new Date(lastActivity).valueOf()
-    console.log(startDiff)
+    const now = new Date()
+    const startDiff = now.valueOf() - startTime.valueOf()
+    if (startDiff > 10 * 60 * 1000 * timeoutModifier) {
+      setShowMessage(true)
+
+      setTimeout(() => setShowMessage(false), 2.5 * 1000 * timeoutModifier)
+    }
+    const timeout = setTimeout(
+      () => setPokes((p) => p + 1),
+      2 * 60 * 1000 * timeoutModifier,
+    )
+    return () => clearTimeout(timeout)
+  }, [pokes])
+
+  useEffect(() => {
+    const startDiff = startTime.valueOf() - lastActivity.valueOf()
     if (startDiff > 20 * 60 * 1000 * timeoutModifier) {
       navigate({ to: '/' + DONT_LEAVE_PATH })
     }
-    if (!timeoutId) {
-      const id = setTimeout(afkMessage, 300 * 1000 * timeoutModifier)
-      setTimeoutId(id)
-      console.log('timeout set')
-      setTimeout(poke, 5 * 60 * 1000 * timeoutModifier)
-    } else {
-      console.log('timeout not set')
-    }
+    // if (!timeoutId) {
+    //   const id = setTimeout(afkMessage, 300 * 1000 * timeoutModifier)
+    //   setTimeoutId(id)
+    //   console.log('timeout set')
+    //   setTimeout(poke, 5 * 60 * 1000 * timeoutModifier)
+    // } else {
+    //   console.log('timeout not set')
+    // }
   }, [])
 
-  const setupSwap = useCallback(() => {
-    setSwapPage(false)
-    const next = gamePaths[Math.floor(Math.random() * gamePaths.length)]
-    setNextPage(next)
-    setTimeout(
-      () => {
-        setSwapPage(true)
-      },
-      10 * 60 * 1000 * timeoutModifier,
-    )
-  }, [startTime])
-
-  useEffect(() => {
-    if (swapPage) {
-      setupSwap()
-      if (nextPage && interfereAllowed) {
-        navigate({ to: nextPage })
-      }
-    }
-  }, [swapPage, nextPage])
-
-  const message = useMemo(
-    () => (showMessage ? boredMessages[tooLong] : undefined),
-    [showMessage, boredMessages, tooLong],
+  const wheatMessage = useMemo(
+    () =>
+      showMessage
+        ? boredMessages[Math.floor(Math.random() * boredMessages.length)]
+        : undefined,
+    [showMessage],
   )
 
   const toggleInterference = useCallback(
@@ -160,7 +148,7 @@ export function useEmptyProvider({
     setTitle,
     lastActivity,
     updateActivity,
-    message,
+    wheatMessage,
     interfereAllowed,
     setInterfereAllowed: toggleInterference,
     // setInterfereAllowed: setInterfereAllowed,

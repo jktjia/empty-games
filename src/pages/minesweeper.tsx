@@ -41,7 +41,7 @@ Press space bar while hovering over a square to flag it or reveal its adjacent s
 Press F2 or click the restart button to start a new game`
 
 export default function Minesweeper() {
-  const { updateActivity, message } = useEmptyContext()
+  const { updateActivity, wheatMessage } = useEmptyContext()
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.EXPERT)
   const [hoverX, setHoverX] = useState<number>()
   const [hoverY, setHoverY] = useState<number>()
@@ -102,13 +102,9 @@ export default function Minesweeper() {
     }
   }, [handleKeyDown])
 
-  useEffect(() => {
-    console.log(hoverX, ',', hoverY)
-  }, [hoverX, hoverY])
-
   const splitMessage = useMemo(
-    () => (message ? message.toUpperCase().split('') : []),
-    [message],
+    () => (wheatMessage ? wheatMessage.toUpperCase().split('') : []),
+    [wheatMessage],
   )
 
   return (
@@ -132,7 +128,7 @@ export default function Minesweeper() {
         {tiles.flatMap((r, i) =>
           r.map((t, idx) => {
             let className = cn(
-              'rounded flex items-center justify-center aspect-square p-0 m-0 overflow-visible',
+              'rounded-none flex items-center justify-center aspect-square p-0 m-0 overflow-visible',
               'max-w-full',
             )
             let content: ReactNode = <></>
@@ -143,7 +139,7 @@ export default function Minesweeper() {
               )
               if (isGameLost && mines && mines[i][idx] == -1) {
                 content = <Bomb className="text-accent" />
-              } else if (message) {
+              } else if (wheatMessage) {
                 content =
                   splitMessage[(i * r.length + idx) % splitMessage.length]
               }
@@ -167,7 +163,7 @@ export default function Minesweeper() {
               )
               if (mines[i][idx] > 0) {
                 content = mines[i][idx]
-              } else if (message) {
+              } else if (wheatMessage) {
                 content = splitMessage[(i * r.length + t) % splitMessage.length]
               }
             }

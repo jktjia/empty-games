@@ -1,5 +1,6 @@
 export const MINESWEEPER_PATH = 'minesweeper'
 export const TETRIS_PATH = 'tetris'
+export const SNAKE_PATH = 'snake'
 
 export const SETTINGS_PATH = 'settings'
 
