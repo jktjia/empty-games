@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { initApple, initSnake, makeTiles, update } from './helpers'
+import {
+  initApple,
+  initSnake,
+  makeTiles,
+  randomCoords,
+  update,
+} from './helpers'
+import { useSnakeInterefere } from './use-interfere'
 import type { Coord, WidthHeightSettings } from '@/types'
 import { Direction } from '@/types'
 import { moveDirs } from '@/utils'
@@ -39,7 +46,9 @@ export default function useSnake(
   const [tickModifier, setTickModifier] = useState<number>(1)
 
   const restart = useCallback(() => {
+    setPaused(false)
     setGameState(initState(width, height))
+    setTickModifier(1)
   }, [setGameState])
 
   const up = useCallback(() => {
@@ -121,11 +130,41 @@ export default function useSnake(
     }, tickTime)
 
     return () => clearTimeout(timeout)
-  }, [, ticker])
+  }, [ticker])
 
   const togglePause = useCallback(() => {
     setPaused((p) => !p)
   }, [setPaused])
+
+  const moveApple = useCallback(
+    (coord: Coord) => {
+      setGameState((s) => ({ ...s, apple: coord }))
+    },
+    [setGameState],
+  )
+
+  const moveSnake = useCallback(
+    (coord: Coord) => {
+      setGameState((s) => ({ ...s, snake: [coord, ...s.snake.slice(1)] }))
+    },
+    [setGameState],
+  )
+
+  const getRandomCoords = useCallback(() => {
+    return randomCoords(gameState.width, gameState.height, gameState.snake)
+  }, [gameState])
+
+  useSnakeInterefere({
+    isGameOver,
+    restart,
+    paused,
+    togglePause,
+    tickModifier,
+    setTickModifier,
+    moveApple,
+    moveSnake,
+    getRandomCoords,
+  })
 
   return {
     restart,

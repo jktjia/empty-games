@@ -19,7 +19,7 @@ export function initApple(width: number = 20, height: number = 15): Coord {
   return { x, y }
 }
 
-export function newApple(
+export function randomCoords(
   width: number = 20,
   height: number = 15,
   snakeCoords: Coord[],
@@ -91,7 +91,7 @@ export function update(state: SnakeState): SnakeState {
     ...state,
     snake: [head, ...snakeBody],
     apple: ateApple
-      ? newApple(state.width, state.height, [head, ...snakeBody])
+      ? randomCoords(state.width, state.height, [head, ...snakeBody])
       : state.apple,
     score: ateApple ? state.score + 1 : state.score,
   }

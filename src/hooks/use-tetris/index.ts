@@ -103,7 +103,9 @@ export default function useTetris(
   const restart = useCallback(() => {
     setGameState(initTetris(width, height))
     setGameOver(false)
-  }, [setGameState, setGameOver])
+    setTickModifier(1)
+    setPaused(false)
+  }, [setGameState, setGameOver, setTickModifier, setPaused])
 
   const left = (state: TetrisState) => {
     let newX = state.x
