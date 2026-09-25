@@ -1,11 +1,23 @@
 import type { Coord, SnakeSpace } from '@/types'
 import type { SnakeState } from '.'
-import { SnakeTileState } from '@/types'
+import { Direction, SnakeTileState } from '@/types'
 import { moveDirs } from '@/utils'
+
+export const initState = (width: number, height: number) => {
+  return {
+    width,
+    height,
+    snake: initSnake(width, height),
+    apple: initApple(width, height),
+    score: 0,
+    dir: Direction.RIGHT,
+    isGameLost: false,
+  }
+}
 
 export function initSnake(width: number = 20, height: number = 15): Coord[] {
   const y = Math.floor(height / 2)
-  const x = Math.floor(width / 3)
+  const x = Math.floor(width / 3) - 1
   return [
     { x: x + 1, y },
     { x, y },

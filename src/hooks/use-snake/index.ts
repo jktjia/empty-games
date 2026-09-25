@@ -1,15 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  initApple,
-  initSnake,
-  makeTiles,
-  randomCoords,
-  update,
-} from './helpers'
-import { useSnakeInterefere } from './use-interfere'
+import { initState, makeTiles, randomCoords, update } from './helpers'
+import { useSnakeInterefere } from './interfere'
 import type { Coord, WidthHeightSettings } from '@/types'
 import { Direction } from '@/types'
-import { moveDirs } from '@/utils'
+import { decrypt, encrypt, moveDirs } from '@/utils'
 
 export interface SnakeState {
   width: number
@@ -21,29 +15,30 @@ export interface SnakeState {
   isGameLost: boolean
 }
 
-const initState = (width: number, height: number) => {
-  return {
-    width,
-    height,
-    snake: initSnake(width, height),
-    apple: initApple(width, height),
-    score: 0,
-    dir: Direction.RIGHT,
-    isGameLost: false,
-  }
-}
-
 export default function useSnake(
   { width, height }: WidthHeightSettings = { width: 20, height: 15 },
 ) {
-  const [gameState, setGameState] = useState<SnakeState>(
-    initState(width, height),
-  )
+  const [gameState, setGameState] = useState<SnakeState>(() => {
+    const localTiles = localStorage.getItem('snake')
+    if (localTiles) {
+      const state: SnakeState = JSON.parse(decrypt(localTiles))
+      const matchingSettings = state.width == width && state.height == height
+      if (matchingSettings) {
+        return state
+      }
+    }
+    return initState(width, height)
+  })
 
   const [paused, setPaused] = useState<boolean>(false)
   const [updateNow, setUpdateNow] = useState<boolean>(false)
   const [ticker, setTicker] = useState<number>(0)
   const [tickModifier, setTickModifier] = useState<number>(1)
+
+  useEffect(() => {
+    const strState = encrypt(JSON.stringify(gameState))
+    localStorage.setItem('snake', strState)
+  }, [gameState])
 
   const restart = useCallback(() => {
     setPaused(false)
