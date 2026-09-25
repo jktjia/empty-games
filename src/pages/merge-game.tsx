@@ -9,6 +9,13 @@ import { Button } from '@/components/ui/button'
 const controls = `Use arrow keys to move the tiles.
 When two tiles having the same number touch, they join into one.`
 
+const tileBaseCN = cn(
+  'flex items-center justify-center aspect-square p-0 m-0',
+  'max-w-full text-black ',
+)
+
+const tileEmptyCN = 'bg-muted-foreground opacity-25 shadow-lg'
+
 export default function MergeGame() {
   const { updateActivity } = useEmptyContext()
   const {
@@ -56,50 +63,51 @@ export default function MergeGame() {
       resetFocus={focusGrid}
       controls={controls}
     >
-      <div
-        className={cn(
-          'grid grid-cols-4 gap-2 transition-all text-xl w-full',
-          isGameOver() ? ' opacity-50' : '',
-        )}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        ref={gridRef}
-        autoFocus
-      >
-        {tiles.flatMap((r, i) =>
-          r.map((t, idx) =>
-            t ? (
-              <ViewTransition key={t.id + ''} name={t.id + ''}>
+      <ViewTransition>
+        <div
+          className={cn(
+            'grid grid-cols-4 gap-2 transition-all text-xl w-full',
+            isGameOver() ? ' opacity-50' : '',
+          )}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          ref={gridRef}
+          autoFocus
+        >
+          {tiles.flatMap((r, i) =>
+            r.map((t, idx) =>
+              t ? (
                 <div
-                  className={`${
-                    gradient[Math.min(Math.log2(t.value), gradient.length)] +
-                    ' shadow-lg text-black'
-                  } aspect-square flex items-center justify-center`}
+                  className={cn(
+                    tileBaseCN,
+                    gradient[Math.min(Math.log2(t.value), gradient.length)],
+                  )}
                   key={'tile-' + i + '-' + idx}
+                  style={{ viewTransitionName: 'tile-' + t.id }}
                 >
                   {t.value}
                 </div>
-              </ViewTransition>
-            ) : (
-              <div
-                className={`bg-secondary text-gray-500 aspect-square flex items-center justify-center`}
-                key={'tile-' + i + '-' + idx}
-              />
+              ) : (
+                <div
+                  className={cn(tileBaseCN, tileEmptyCN)}
+                  key={'tile-' + i + '-' + idx}
+                />
+              ),
             ),
-          ),
-        )}
-      </div>
-      {isGameWon && (
-        <div className="absolute w-fit flex flex-col gap-2">
-          <div className="bg-background/50 rounded p-2">Game Won!</div>
-          <Button
-            className="bg-background/50 text-primary"
-            onClick={continueGame}
-          >
-            Continue
-          </Button>
+          )}
         </div>
-      )}
+        {isGameWon && (
+          <div className="absolute w-fit flex flex-col gap-2">
+            <div className="bg-background/50 rounded p-2">Game Won!</div>
+            <Button
+              className="bg-background/50 text-primary"
+              onClick={continueGame}
+            >
+              Continue
+            </Button>
+          </div>
+        )}
+      </ViewTransition>
     </GameContent>
   )
 }

@@ -13,12 +13,9 @@ const tileColors = {
   [SnakeTileState.BODY]: gradient[5],
 }
 
-const controls = `Left and right arrow keys: Piece shifting
-Up arrow key: Rotating 90 degrees clockwise
-Down arrow key: Non-locking soft drop
-Space bar: Locking hard drop
-C key / Shift key: Hold piece`
-// Z key / Left Control key: Rotating 90 degrees counterclockwise`
+const controls = `Use arrow keys to change directions 
+Eat apples to grow longer
+Do not hit the walls or part of the snake`
 
 const defaultSettings = {
   width: 20,
@@ -26,7 +23,7 @@ const defaultSettings = {
 }
 
 const tileBaseCN = cn(
-  ' flex items-center justify-center aspect-square p-0 m-0',
+  'flex items-center justify-center aspect-square p-0 m-0',
   'max-w-full w-8 text-black text-sm ',
 )
 
@@ -49,16 +46,20 @@ export default function Snake() {
   } = useSnake()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowUp' || e.key === 'w') {
-      up()
-    } else if (e.key === 'ArrowDown' || e.key === 's') {
-      down()
-    } else if (e.key === 'ArrowLeft' || e.key === 'a') {
-      left()
-    } else if (e.key === 'ArrowRight' || e.key === 'd') {
-      right()
-    } else if (e.key === 'Escape') {
-      togglePause()
+    if (!isGameOver) {
+      if (e.key === 'ArrowUp' || e.key === 'w') {
+        up()
+      } else if (e.key === 'ArrowDown' || e.key === 's') {
+        down()
+      } else if (e.key === 'ArrowLeft' || e.key === 'a') {
+        left()
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        right()
+      } else if (e.key === 'Escape') {
+        togglePause()
+      }
+    } else {
+      restart()
     }
     updateActivity()
   }

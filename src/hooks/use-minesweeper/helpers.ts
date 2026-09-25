@@ -22,6 +22,19 @@ export function revealNeighbors(
   tiles: MineTileState[][],
 ): MineTileState[][] {
   const dup = JSON.parse(JSON.stringify(tiles))
+  let flagNeighbors = 0
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (x + j >= 0 && x + j < width && y + i >= 0 && y + i < height) {
+        if (tiles[y + i][x + j] == MineTileState.FLAG) {
+          flagNeighbors++
+        }
+      }
+    }
+  }
+  if (mines[y][x] != flagNeighbors) {
+    return dup
+  }
   for (let i = -1; i <= 1; i++) {
     for (let j = -1; j <= 1; j++) {
       if (x + j >= 0 && x + j < width && y + i >= 0 && y + i < height) {
