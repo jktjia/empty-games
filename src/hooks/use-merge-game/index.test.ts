@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import * as helperMod from './helpers'
 import useMergeGame from '.'
+import { encrypt } from '@/utils'
 
 afterEach(() => {
   localStorage.clear()
@@ -31,6 +32,28 @@ test('init tiles', () => {
   ).toBe(1)
   expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(false)
+  expect(result.current.isGameWon).toBe(false)
+})
+
+test('init from local storage', () => {
+  const state = {
+    score: 48,
+    tiles: [
+      [null, null, null, { value: 8, id: 1 }],
+      [null, null, null, { value: 32, id: 2 }],
+      [null, { value: 4, id: 3 }, null, null],
+      [null, null, { value: 2048, id: 4 }, null],
+    ],
+    continue: true,
+  }
+
+  localStorage.setItem('merge-game', encrypt(JSON.stringify(state)))
+
+  const { result } = renderHook(() => useMergeGame())
+
+  expect(result.current.tiles).toStrictEqual(state.tiles)
+  expect(result.current.score).toBe(48)
+  expect(result.current.isGameOver()).toBe(false)
 })
 
 test('slide up', () => {
@@ -395,7 +418,7 @@ test('game over when nowhere to move', () => {
   expect(result.current.isGameWon).toBe(false)
 })
 
-test('game won when 2048 on board', () => {
+test('game won when 2048 on board and continue', () => {
   const tileSpy = vi.spyOn(helperMod, 'initTiles')
   tileSpy.mockReturnValue([
     [null, null, null, { id: 0, value: 2 }],
@@ -410,6 +433,11 @@ test('game won when 2048 on board', () => {
 
   expect(result.current.isGameLost).toBe(false)
   expect(result.current.isGameWon).toBe(true)
+  expect(result.current.isGameOver()).toBe(true)
+
+  act(() => result.current.continueGame())
+
+  expect(result.current.isGameOver()).toBe(false)
 })
 
 test('game won when 2048 exceeded', () => {
