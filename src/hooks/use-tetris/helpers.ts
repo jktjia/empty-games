@@ -1,22 +1,15 @@
-import { blockMatrices, iOffsets, oOffsets, offsets } from './consts'
-import type { TetrisSpace } from '@/types'
+import {
+  blockMatrices,
+  dirClockwise,
+  iOffsets,
+  oOffsets,
+  offsets,
+} from './consts'
+import type { TetrisSpace, TetrisState } from '@/types'
 import { Direction, TetrisBlock } from '@/types'
 import { moveDirs } from '@/utils'
 
-export function sameTiles<T>(t1: T[][], t2: T[][]): boolean {
-  let same = true
-  for (let i = 0; i < t1.length; i++) {
-    for (let j = 0; j < t1[i].length; j++) {
-      same = same && t1[i][j] == t2[i][j]
-    }
-  }
-  return same
-}
-
-export function initTiles(
-  width: number = 10,
-  height: number = 20,
-): TetrisSpace[][] {
+function initTiles(width: number = 10, height: number = 20): TetrisSpace[][] {
   const baseTiles: TetrisSpace[][] = []
   for (let i = 0; i < height; i++) {
     baseTiles[i] = []
@@ -27,34 +20,47 @@ export function initTiles(
   return baseTiles
 }
 
+export function initState(width: number, height: number): TetrisState {
+  const firstBlocks = randomBag()
+  return {
+    tiles: initTiles(width, height),
+    rotation: Direction.UP,
+    block: firstBlocks[0],
+    x: width / 2 - 1,
+    y: 0,
+    next: firstBlocks.slice(1),
+    width,
+    height,
+    score: 0,
+    rows: 0,
+  }
+}
+
 function rotateMatrix(current: boolean[][]) {
   return current.map((row, i) =>
     row.map((_, j) => current[current.length - 1 - j][i]),
   )
 }
 
-function rotationCount(current: boolean[][], block: TetrisBlock) {
-  let n = 0
+export function getMatrix(rotation: Direction, block: TetrisBlock) {
   let matrix = blockMatrices[block]
-  while (!sameTiles(current, matrix)) {
+  let rot = Direction.UP
+  while (rot != rotation) {
     matrix = rotateMatrix(matrix)
-    n++
+    rot = dirClockwise[rot]
   }
-  return n
+  return matrix
 }
 
 export function rotateSRSKick(
   tiles: TetrisSpace[][],
-  current: boolean[][],
+  rotation: Direction,
   block: TetrisBlock,
   x: number,
   y: number,
 ) {
-  const rotN = rotationCount(current, block)
-  const nextRotN = rotN == 3 ? 0 : rotN + 1
-  const rotated = current.map((row, i) =>
-    row.map((_, j) => current[current.length - 1 - j][i]),
-  )
+  const nextRot = dirClockwise[rotation]
+  const matrix = getMatrix(nextRot, block)
 
   const offsetList =
     block == TetrisBlock.I
@@ -63,14 +69,63 @@ export function rotateSRSKick(
         ? oOffsets
         : offsets
 
-  for (let n = 0; n < (block == TetrisBlock.O ? 1 : 5); n++) {
-    const offsetX = offsetList[rotN][n].x - offsetList[nextRotN][n].x
-    const offsetY = offsetList[rotN][n].y - offsetList[nextRotN][n].y
-    if (currentValid(tiles, rotated, x + offsetX, y + offsetY)) {
-      return { rotated, x: x + offsetX, y: y + offsetY }
+  for (let n = 0; n < offsetList[rotation].length; n++) {
+    const offsetX = offsetList[rotation][n].x - offsetList[nextRot][n].x
+    const offsetY = offsetList[rotation][n].y - offsetList[nextRot][n].y
+    if (currentValid(tiles, matrix, x + offsetX, y - offsetY)) {
+      return { rotation: nextRot, x: x + offsetX, y: y - offsetY }
     }
   }
-  return { rotated: current, x, y }
+  return { rotation, x, y }
+}
+
+export function checkTSpin(
+  tiles: TetrisSpace[][],
+  rotation: Direction,
+  block: TetrisBlock,
+  x: number,
+  y: number,
+) {
+  if (block != TetrisBlock.T) {
+    return { tSpin: false, miniT: false }
+  } else {
+    const dirMod = moveDirs[rotation]
+    const frontCorners = [
+      { x: dirMod.x == 0 ? 1 : dirMod.x, y: dirMod.y == 0 ? 1 : dirMod.y },
+      { x: dirMod.x == 0 ? -1 : dirMod.x, y: dirMod.y == 0 ? -1 : dirMod.y },
+    ]
+    const backCorners = [
+      { x: dirMod.x == 0 ? 1 : -dirMod.x, y: dirMod.y == 0 ? 1 : -dirMod.y },
+      { x: dirMod.x == 0 ? -1 : -dirMod.x, y: dirMod.y == 0 ? -1 : -dirMod.y },
+    ]
+
+    const filledFront = frontCorners.filter((c) =>
+      spaceFilled(tiles, x + c.x, y + c.y),
+    ).length
+    const filledBack = backCorners.filter((c) =>
+      spaceFilled(tiles, x + c.x, y + c.y),
+    ).length
+
+    if (filledBack + filledFront < 3) {
+      return { tSpin: false, miniT: false }
+    } else {
+      if (filledFront == 2) {
+        return { tSpin: true, miniT: false }
+      } else {
+        return { tSpin: false, miniT: true }
+      }
+    }
+  }
+}
+
+function spaceFilled(tiles: TetrisSpace[][], x: number, y: number) {
+  return (
+    y < 0 ||
+    y >= tiles.length ||
+    x < 0 ||
+    x >= tiles[y].length ||
+    tiles[y][x] != null
+  )
 }
 
 export function canMoveDown(

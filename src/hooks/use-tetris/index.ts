@@ -4,11 +4,13 @@ import {
   canMoveDown,
   canMoveLeft,
   canMoveRight,
+  checkTSpin,
   clearRows,
   currentValid,
+  getMatrix,
   ghostCoords,
   ghostLocation,
-  initTiles,
+  initState,
   placeCurrent,
   randomBag,
   rotateSRSKick,
@@ -19,54 +21,28 @@ import {
   blockMatrices,
   labelRowsCleared,
   rowsClearedPerLevel,
+  scoreMiniTRows,
   scoreRowsCleared,
+  scoreTSpinRows,
 } from './consts'
-import { useTetrisInterfere } from './use-interfere'
-import type { TetrisBlock, TetrisSpace, WidthHeightSettings } from '@/types'
+import { useTetrisInterfere } from './interfere'
+import type { TetrisState, WidthHeightSettings } from '@/types'
+import { Direction, TetrisBlock } from '@/types'
 import { decrypt, encrypt } from '@/utils'
-
-interface TetrisState {
-  tiles: TetrisSpace[][]
-  matrix: boolean[][]
-  block: TetrisBlock
-  x: number
-  y: number
-  hold?: TetrisBlock
-  next: TetrisBlock[]
-  width: number
-  height: number
-  score: number
-  rows: number
-}
-
-const initTetris = (width: number, height: number) => {
-  const firstBlocks = randomBag()
-  return {
-    tiles: initTiles(width, height),
-    matrix: blockMatrices[firstBlocks[0]],
-    block: firstBlocks[0],
-    x: width / 2 - 1,
-    y: 0,
-    next: firstBlocks.slice(1),
-    width,
-    height,
-    score: 0,
-    rows: 0,
-  }
-}
 
 export default function useTetris(
   { width, height }: WidthHeightSettings = { width: 10, height: 20 },
 ) {
   const [gameState, setGameState] = useState<TetrisState>(() => {
     const localTiles = localStorage.getItem('tetris')
-    const matchingSettings =
-      localTiles &&
-      JSON.parse(decrypt(localTiles))['width'] == width &&
-      JSON.parse(decrypt(localTiles))['height'] == height
-    return localTiles && matchingSettings
-      ? JSON.parse(decrypt(localTiles))
-      : initTetris(width, height)
+    if (localTiles) {
+      const state: TetrisState = JSON.parse(decrypt(localTiles))
+      const matchingSettings = state.width == width && state.height == height
+      if (matchingSettings) {
+        return state
+      }
+    }
+    return initState(width, height)
   })
 
   const [softDown, setSoftDown] = useState<boolean>(false)
@@ -77,16 +53,14 @@ export default function useTetris(
   const [isGameOver, setGameOver] = useState<boolean>(false)
   const [holdPossible, setHoldPossible] = useState<boolean>(true)
   const [prevDifficult, setPrevDifficult] = useState<boolean>(false)
+  const [didTSpin, setDidTSpin] = useState<boolean>(false)
+  const [miniTSpin, setMiniTSpin] = useState<boolean>(false)
 
   const [annoucement, setAnnouncement] = useState<string>()
 
   const ghost = useMemo(() => {
-    return ghostCoords(
-      gameState.tiles,
-      gameState.matrix,
-      gameState.x,
-      gameState.y,
-    )
+    const matrix = getMatrix(gameState.rotation, gameState.block)
+    return ghostCoords(gameState.tiles, matrix, gameState.x, gameState.y)
   }, [gameState])
 
   const level = useMemo(
@@ -94,14 +68,13 @@ export default function useTetris(
     [gameState],
   )
 
-  const updateLocal = (state: TetrisState) => {
-    const strState = encrypt(JSON.stringify(state))
+  useEffect(() => {
+    const strState = encrypt(JSON.stringify(gameState))
     localStorage.setItem('tetris', strState)
-    return state
-  }
+  }, [gameState])
 
   const restart = useCallback(() => {
-    setGameState(initTetris(width, height))
+    setGameState(initState(width, height))
     setGameOver(false)
     setTickModifier(1)
     setPaused(false)
@@ -109,7 +82,8 @@ export default function useTetris(
 
   const left = (state: TetrisState) => {
     let newX = state.x
-    if (canMoveLeft(state.tiles, state.matrix, state.x, state.y)) {
+    const matrix = getMatrix(state.rotation, state.block)
+    if (canMoveLeft(state.tiles, matrix, state.x, state.y)) {
       newX = state.x - 1
     }
     return { ...state, x: newX }
@@ -117,7 +91,8 @@ export default function useTetris(
 
   const right = (state: TetrisState) => {
     let newX = state.x
-    if (canMoveRight(state.tiles, state.matrix, state.x, state.y)) {
+    const matrix = getMatrix(state.rotation, state.block)
+    if (canMoveRight(state.tiles, matrix, state.x, state.y)) {
       newX = state.x + 1
     }
     return { ...state, x: newX }
@@ -142,7 +117,7 @@ export default function useTetris(
             y: 0,
             hold: state.block,
             block: state.hold,
-            matrix: blockMatrices[state.hold],
+            rotation: Direction.UP,
           }
         } else {
           const nextBlock = state.next[0]
@@ -152,7 +127,7 @@ export default function useTetris(
             y: 0,
             hold: state.block,
             block: nextBlock,
-            matrix: blockMatrices[nextBlock],
+            rotation: Direction.UP,
           })
         }
       }
@@ -161,16 +136,38 @@ export default function useTetris(
     [holdPossible],
   )
 
-  const rotate = (state: TetrisState) => {
-    const { rotated, x, y } = rotateSRSKick(
-      state.tiles,
-      state.matrix,
-      state.block,
-      state.x,
-      state.y,
-    )
-    return { ...state, matrix: rotated, x: x, y: y }
-  }
+  const rotate = useCallback(
+    (state: TetrisState) => {
+      const { rotation, x, y } = rotateSRSKick(
+        state.tiles,
+        state.rotation,
+        state.block,
+        state.x,
+        state.y,
+      )
+      if (state.block == TetrisBlock.T) {
+        const { tSpin, miniT } = checkTSpin(
+          state.tiles,
+          rotation,
+          state.block,
+          x,
+          y,
+        )
+        setDidTSpin(tSpin)
+        if (
+          miniT &&
+          ((Math.abs(y - state.y) == 2 && Math.abs(x - state.x) == 1) ||
+            (Math.abs(x - state.x) == 2 && Math.abs(y - state.y) == 1))
+        ) {
+          setDidTSpin(miniT)
+        } else {
+          setMiniTSpin(miniT)
+        }
+      }
+      return { ...state, rotation: rotation, x: x, y: y }
+    },
+    [setDidTSpin, setMiniTSpin],
+  )
 
   const newBlock = useCallback(
     (state: TetrisState) => {
@@ -183,7 +180,7 @@ export default function useTetris(
       }
       return updateNext({
         ...state,
-        matrix: nextMatrix,
+        rotation: Direction.UP,
         block: nextBlock,
         x: width / 2 - 1,
         y: 0,
@@ -192,35 +189,58 @@ export default function useTetris(
     [setHoldPossible, setGameOver],
   )
 
-  const addCurrentToTiles = useCallback(
-    (state: TetrisState) => {
-      const updated = clearRows(
-        placeCurrent(state.tiles, state.matrix, state.x, state.y, state.block),
-      )
+  const scorePlacement = useCallback(
+    (state: TetrisState, rowsCleared: number) => {
       const score =
         state.score +
         level *
-          scoreRowsCleared[updated.rowsCleared] *
-          (updated.rowsCleared == 4 && prevDifficult ? 1.5 : 1)
-      if (updated.rowsCleared == 4) {
+          (didTSpin
+            ? scoreTSpinRows[rowsCleared] *
+              (rowsCleared != 0 && prevDifficult ? 1.5 : 1)
+            : miniTSpin
+              ? scoreMiniTRows[rowsCleared] *
+                (rowsCleared != 0 && prevDifficult ? 1.5 : 1)
+              : scoreRowsCleared[rowsCleared] *
+                (rowsCleared == 4 && prevDifficult ? 1.5 : 1))
+      if (rowsCleared == 4 || didTSpin || miniTSpin) {
         setPrevDifficult(true)
       } else {
         setPrevDifficult(false)
       }
-      setAnnouncement(labelRowsCleared[updated.rowsCleared])
+      if (rowsCleared > 0) {
+        setAnnouncement(
+          (didTSpin ? 'T-Spin ' : miniTSpin ? 'Mini T-Spin ' : '') +
+            labelRowsCleared[rowsCleared],
+        )
+      }
+      setDidTSpin(false)
+      setMiniTSpin(false)
+      return score
+    },
+    [level, didTSpin, prevDifficult, miniTSpin, setAnnouncement],
+  )
+
+  const addCurrentToTiles = useCallback(
+    (state: TetrisState) => {
+      const matrix = getMatrix(state.rotation, state.block)
+      const updated = clearRows(
+        placeCurrent(state.tiles, matrix, state.x, state.y, state.block),
+      )
+
       return newBlock({
         ...state,
         tiles: updated.tiles,
-        score: score,
+        score: scorePlacement(state, updated.rowsCleared),
         rows: state.rows + updated.rowsCleared,
       })
     },
-    [setPrevDifficult, setAnnouncement, newBlock],
+    [newBlock, scorePlacement],
   )
 
   const down = useCallback(
     (state: TetrisState) => {
-      if (canMoveDown(state.tiles, state.matrix, state.x, state.y)) {
+      const matrix = getMatrix(state.rotation, state.block)
+      if (canMoveDown(state.tiles, matrix, state.x, state.y)) {
         return {
           ...state,
           y: state.y + 1,
@@ -235,36 +255,28 @@ export default function useTetris(
 
   const hardDown = useCallback(
     (state: TetrisState) => {
-      const newY = ghostLocation(state.tiles, state.matrix, state.x, state.y)
+      const matrix = getMatrix(state.rotation, state.block)
+      const newY = ghostLocation(state.tiles, matrix, state.x, state.y)
       const updated = clearRows(
-        placeCurrent(state.tiles, state.matrix, state.x, newY, state.block),
+        placeCurrent(state.tiles, matrix, state.x, newY, state.block),
       )
-      const score =
-        state.score +
-        (2 * (newY - state.y) +
-          level *
-            scoreRowsCleared[updated.rowsCleared] *
-            (updated.rowsCleared == 4 && prevDifficult ? 1.5 : 1))
-      if (updated.rowsCleared == 4) {
-        setPrevDifficult(true)
-      } else {
-        setPrevDifficult(false)
-      }
-      setAnnouncement(labelRowsCleared[updated.rowsCleared])
+
       return newBlock({
         ...state,
         tiles: updated.tiles,
-        score: score,
+        score:
+          2 * (newY - state.y) + scorePlacement(state, updated.rowsCleared),
         rows: state.rows + updated.rowsCleared,
       })
     },
-    [setPrevDifficult, setAnnouncement, newBlock],
+    [newBlock, scorePlacement],
   )
 
   const visibleTiles = useMemo(() => {
+    const matrix = getMatrix(gameState.rotation, gameState.block)
     return placeCurrent(
       gameState.tiles,
-      gameState.matrix,
+      matrix,
       gameState.x,
       gameState.y,
       gameState.block,
@@ -284,7 +296,7 @@ export default function useTetris(
 
   useEffect(() => {
     if (updateNow && !isGameOver && !paused) {
-      setGameState((s) => updateLocal(down(s)))
+      setGameState((s) => down(s))
 
       setTicker((t) => t + 1)
       setUpdateNow(false)
@@ -294,7 +306,6 @@ export default function useTetris(
     isGameOver,
     paused,
     setGameState,
-    updateLocal,
     down,
     setTicker,
     setUpdateNow,

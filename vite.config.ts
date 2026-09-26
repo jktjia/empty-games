@@ -11,6 +11,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['vitest-localstorage-mock'],
+    coverage: {
+      include: ['src/hooks/**/*.{ts,tsx}'],
+    },
   },
   resolve: {
     alias: {

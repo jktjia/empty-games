@@ -1,4 +1,9 @@
-import type { SnakeTileState, TetrisBlock, ToastVariant } from './enums'
+import type {
+  Direction,
+  SnakeTileState,
+  TetrisBlock,
+  ToastVariant,
+} from './enums'
 
 export interface MergeTile {
   id: number
@@ -15,7 +20,22 @@ export interface WidthHeightSettings {
 export interface MinesweeperSettings extends WidthHeightSettings {
   mineCount: number
 }
+
 export type TetrisSpace = TetrisBlock | null
+
+export interface TetrisState {
+  tiles: TetrisSpace[][]
+  rotation: Direction
+  block: TetrisBlock
+  x: number
+  y: number
+  hold?: TetrisBlock
+  next: TetrisBlock[]
+  width: number
+  height: number
+  score: number
+  rows: number
+}
 
 export interface InterfereAction {
   actionPossible: boolean

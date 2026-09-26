@@ -1,489 +1,1401 @@
-import { expect, test } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import * as helperMod from './helpers'
-import { TetrisBlock } from '@/types'
+import useTetris from '.'
+import { Direction, TetrisBlock } from '@/types'
+import { encrypt } from '@/utils'
 
-test('initTiles creates empty 10x20', () => {
-  const result = helperMod.initTiles()
-
-  expect(result.length).toBe(20)
-  expect(result.every((r) => r.length == 10)).toBe(true)
-  expect(result.every((r) => r.every((t) => t == null))).toBe(true)
+afterEach(() => {
+  localStorage.clear()
 })
 
-// test('rotate', () => {
-//     const initial = [
-//         [false, true, true],
-//         [false, true, false],
-//         [false, true, false],
-//     ]
-//     const current = [
-//         [false, false, false],
-//         [true, true, true],
-//         [false, false, true],
-//     ]
+test('init', () => {
+  const width = 10
+  const height = 5
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-//     const emptyTiles = helperMod.initTiles()
-
-//     const result = helperMod.rotateSRSKick(emptyTiles, initial, TetrisBlock.J, 4, 4)
-
-//     expect(result.rotated).toEqual(current)
-//     expect(result.x).toEqual(4)
-//     expect(result.y).toEqual(4)
-// })
-
-// test('rotate 2', () => {
-//     const initial = [
-//         [false, false, true, false, false],
-//         [false, false, true, false, false],
-//         [false, false, true, false, false],
-//         [false, false, true, false, false],
-//         [false, false, false, false, false],
-//     ]
-//     const current = [
-//         [false, false, false, false, false],
-//         [false, false, false, false, false],
-//         [false, true, true, true, true],
-//         [false, false, false, false, false],
-//         [false, false, false, false, false],
-//     ]
-
-//     const emptyTiles = helperMod.initTiles()
-
-//     const result = helperMod.rotateSRSKick(emptyTiles, initial, TetrisBlock.I, 4, 4)
-
-//     expect(result.rotated).toEqual(current)
-//     expect(result.x).toEqual(4)
-//     expect(result.y).toEqual(4)
-// })
-
-// test('rotate 3', () => {
-//     const initial = [
-//         [false, true, true],
-//         [false, true, true],
-//         [false, false, false],
-//     ]
-//     const current = [
-//         [false, false, false],
-//         [false, true, true],
-//         [false, true, true],
-//     ]
-
-//     const emptyTiles = helperMod.initTiles()
-
-//     const result = helperMod.rotateSRSKick(emptyTiles, initial, TetrisBlock.I, 4, 4)
-
-//     expect(result.rotated).toEqual(current)
-//     expect(result.x).toEqual(4)
-//     expect(result.y).toEqual(4)
-// })
-
-test('can move down', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
-
-  const result = helperMod.canMoveDown(tiles, current, 2, 2)
-
-  expect(result).toBe(true)
+  expect(result.current.held).toBeUndefined()
+  expect(result.current.visibleTiles.length).toEqual(height)
+  expect(
+    result.current.visibleTiles.every((r) => r.length == width),
+  ).toBeTruthy()
+  expect(result.current.next.length).toEqual(6)
+  expect(result.current.score).toEqual(0)
+  expect(result.current.level).toEqual(0)
+  expect(result.current.paused).toBeFalsy()
 })
 
-test('cannot move down if at bottom', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
+test('init when local storage does not match', () => {
+  const width = 10
+  const height = 20
 
-  const result = helperMod.canMoveDown(tiles, current, 2, 3)
+  const state = {
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [
+        null,
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+      ],
+    ],
+    rotation: Direction.DOWN,
+    block: TetrisBlock.I,
+    hold: TetrisBlock.S,
+    x: 4,
+    y: 1,
+    next: [TetrisBlock.J, TetrisBlock.L, TetrisBlock.O, TetrisBlock.Z],
+    width: 10,
+    height: 5,
+    score: 42,
+    rows: 72,
+  }
 
-  expect(result).toBe(false)
+  localStorage.setItem('tetris', encrypt(JSON.stringify(state)))
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  expect(result.current.held).toBeUndefined()
+  expect(result.current.visibleTiles.length).toEqual(height)
+  expect(
+    result.current.visibleTiles.every((r) => r.length == width),
+  ).toBeTruthy()
+  expect(result.current.next.length).toEqual(6)
+  expect(result.current.score).toEqual(0)
+  expect(result.current.level).toEqual(0)
+  expect(result.current.paused).toBeFalsy()
 })
 
-test('cannot move down if block below', () => {
+test('init from local storage', () => {
+  const width = 10
+  const height = 5
+
+  const state = {
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [
+        null,
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+      ],
+    ],
+    rotation: Direction.DOWN,
+    block: TetrisBlock.I,
+    hold: TetrisBlock.S,
+    x: 4,
+    y: 1,
+    next: [TetrisBlock.J, TetrisBlock.L, TetrisBlock.O, TetrisBlock.Z],
+    width,
+    height,
+    score: 42,
+    rows: 72,
+  }
+
   const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+    ],
   ]
 
-  const result = helperMod.canMoveDown(tiles, current, 2, 2)
+  localStorage.setItem('tetris', encrypt(JSON.stringify(state)))
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-  expect(result).toBe(false)
+  expect(result.current.held).toBe(TetrisBlock.S)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.next).toEqual([
+    TetrisBlock.J,
+    TetrisBlock.L,
+    TetrisBlock.O,
+    TetrisBlock.Z,
+  ])
+  expect(result.current.score).toEqual(42)
+  expect(result.current.level).toEqual(7)
+  expect(result.current.isGameOver).toBeFalsy()
+  expect(result.current.paused).toBeFalsy()
 })
 
-test('cannot move down if block below 2', () => {
+test('move left', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [
+        null,
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+      ],
+    ],
+    rotation: Direction.DOWN,
+    block: TetrisBlock.I,
+    hold: TetrisBlock.S,
+    x: 4,
+    y: 1,
+    next: [TetrisBlock.J, TetrisBlock.L, TetrisBlock.O, TetrisBlock.Z],
+    width,
+    height,
+    score: 42,
+    rows: 72,
+  })
+
   const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, TetrisBlock.L, TetrisBlock.L],
-    [null, null, null, null, TetrisBlock.L],
-    [null, null, null, null, TetrisBlock.L],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+    ],
   ]
 
-  const result = helperMod.canMoveDown(tiles, current, 2, 2)
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-  expect(result).toBe(false)
+  act(() => result.current.left())
+
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
 })
 
-test('can move left', () => {
+test('move left', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [
+        null,
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        null,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.T,
+        TetrisBlock.Z,
+        TetrisBlock.Z,
+        null,
+        null,
+        null,
+      ],
+    ],
+    rotation: Direction.DOWN,
+    block: TetrisBlock.J,
+    hold: TetrisBlock.S,
+    x: 4,
+    y: 1,
+    next: [TetrisBlock.J, TetrisBlock.L, TetrisBlock.O, TetrisBlock.Z],
+    width,
+    height,
+    score: 42,
+    rows: 72,
+  })
+
   const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      null,
+      null,
+      TetrisBlock.J,
+      TetrisBlock.J,
+      TetrisBlock.J,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, TetrisBlock.J, null, null, null],
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+    ],
   ]
 
-  const result = helperMod.canMoveLeft(tiles, current, 2, 2)
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-  expect(result).toBe(true)
+  act(() => result.current.right())
+
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
 })
 
-test('cannot move left if at side', () => {
+test('hold no existing hold', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+    ],
+    rotation: Direction.LEFT,
+    block: TetrisBlock.L,
+    x: 4,
+    y: 2,
+    next: [TetrisBlock.I, TetrisBlock.J, TetrisBlock.O, TetrisBlock.S],
+    width,
+    height,
+    score: 0,
+    rows: 0,
+  })
+
   const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
-
-  const result = helperMod.canMoveLeft(tiles, current, 0, 2)
-
-  expect(result).toBe(false)
-})
-
-test('cannot move left if block to left', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [TetrisBlock.T, null, null, null, null],
-    [TetrisBlock.T, TetrisBlock.T, null, null, null],
-    [TetrisBlock.T, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
   ]
 
-  const result = helperMod.canMoveLeft(tiles, current, 2, 2)
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-  expect(result).toBe(false)
-})
+  act(() => result.current.hold())
 
-test('can move right', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
-
-  const result = helperMod.canMoveRight(tiles, current, 2, 2)
-
-  expect(result).toBe(true)
-})
-
-test('cannot move right if at side', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
-
-  const result = helperMod.canMoveRight(tiles, current, 3, 2)
-
-  expect(result).toBe(false)
-})
-
-test('cannot move right if block to right', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, TetrisBlock.I],
-    [null, null, null, null, TetrisBlock.I],
-    [null, null, null, null, TetrisBlock.I],
-    [null, null, null, null, TetrisBlock.I],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
-
-  const result = helperMod.canMoveRight(tiles, current, 2, 2)
-
-  expect(result).toBe(false)
-})
-
-test('cannot move right if block to right 2', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-  ]
-  const current = [
-    [false, true, true],
-    [false, true, false],
-    [false, true, false],
-  ]
-
-  const result = helperMod.canMoveRight(tiles, current, 2, 3)
-
-  expect(result).toBe(false)
-})
-
-test('ghost piece 1', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, false, false],
-    [false, true, false, false],
-    [false, true, false, false],
-    [false, true, false, false],
-  ]
-
-  const result = helperMod.ghostLocation(tiles, current, 2, 0)
-
-  expect(result).toBe(2)
-})
-
-test('ghost piece 2', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, true, false, false],
-    [false, true, false, false],
-    [false, true, false, false],
-    [false, true, false, false],
-  ]
-
-  const result = helperMod.ghostLocation(tiles, current, 2, 0)
-
-  expect(result).toBe(2)
-})
-
-test('ghost piece 3', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, false, false, false],
-    [true, true, true, true],
-    [false, false, false, false],
-    [false, false, false, false],
-  ]
-
-  const result = helperMod.ghostLocation(tiles, current, 1, 0)
-
-  expect(result).toBe(4)
-})
-
-test('ghost piece 4', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, false, false, false],
-    [false, false, false, false],
-    [true, true, true, true],
-    [false, false, false, false],
-  ]
-
-  const result = helperMod.ghostLocation(tiles, current, 1, 0)
-
-  expect(result).toBe(3)
-})
-
-test('ghost piece 5', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-  ]
-  const current = [
-    [false, false, false, false],
-    [true, true, true, true],
-    [false, false, false, false],
-    [false, false, false, false],
-  ]
-
-  const result = helperMod.ghostLocation(tiles, current, 1, 0)
-
-  expect(result).toBe(2)
-})
-
-test('ghost coords', () => {
-  const tiles = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-  ]
-  const current = [
-    [false, false, false, false],
-    [true, true, true, true],
-    [false, false, false, false],
-    [false, false, false, false],
-  ]
-
-  const result = helperMod.ghostCoords(tiles, current, 1, 0)
-
-  expect(result).toStrictEqual([
-    { x: 0, y: 2 },
-    { x: 1, y: 2 },
-    { x: 2, y: 2 },
-    { x: 3, y: 2 },
+  expect(result.current.held).toStrictEqual(TetrisBlock.L)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.next).toEqual([
+    TetrisBlock.J,
+    TetrisBlock.O,
+    TetrisBlock.S,
   ])
 })
 
-test('place current', () => {
-  const initial = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-  ]
-  const current = [
-    [false, false, false, false, false],
-    [false, false, false, false, false],
-    [false, true, true, true, true],
-    [false, false, false, false],
-    [false, false, false, false],
-  ]
-  const final = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, null],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
+test('hold with existing hold', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+    ],
+    rotation: Direction.LEFT,
+    block: TetrisBlock.L,
+    x: 4,
+    y: 2,
+    hold: TetrisBlock.Z,
+    next: [TetrisBlock.I, TetrisBlock.J, TetrisBlock.O, TetrisBlock.S],
+    width,
+    height,
+    score: 0,
+    rows: 0,
+  })
+
+  const tiles = [
+    [
+      null,
+      null,
+      null,
+      null,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
   ]
 
-  const result = helperMod.placeCurrent(initial, current, 1, 2, TetrisBlock.I)
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-  expect(result).toStrictEqual(final)
+  act(() => result.current.hold())
+  expect(result.current.held).toStrictEqual(TetrisBlock.L)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.next).toEqual([
+    TetrisBlock.I,
+    TetrisBlock.J,
+    TetrisBlock.O,
+    TetrisBlock.S,
+  ])
+
+  act(() => result.current.hold())
+
+  expect(result.current.held).toStrictEqual(TetrisBlock.L)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.next).toEqual([
+    TetrisBlock.I,
+    TetrisBlock.J,
+    TetrisBlock.O,
+    TetrisBlock.S,
+  ])
 })
 
-test('place current 2', () => {
-  const initial = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-  ]
-  const current = [
-    [false, false, false, false, false],
-    [false, false, false, false, false],
-    [false, true, true, true, true],
-    [false, false, false, false],
-    [false, false, false, false],
-  ]
-  const final = [
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [null, null, null, null, null],
-    [TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, null],
+test('rotate impossible', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+    ],
+    rotation: Direction.RIGHT,
+    block: TetrisBlock.Z,
+    x: 4,
+    y: 3,
+    next: [
+      TetrisBlock.J,
+      TetrisBlock.L,
+      TetrisBlock.O,
+      TetrisBlock.S,
+      TetrisBlock.Z,
+    ],
+    width,
+    height,
+    score: 0,
+    rows: 100,
+  })
+
+  const tiles = [
+    [
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      null,
+      null,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
+    [
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      null,
+      null,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
+    [
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      null,
+      TetrisBlock.Z,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
+    [
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
+    [
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.Z,
+      null,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
   ]
 
-  const result = helperMod.placeCurrent(initial, current, 1, 4, TetrisBlock.I)
+  const { result } = renderHook(() => useTetris({ width, height }))
 
-  expect(result).toStrictEqual(final)
+  act(() => result.current.rotate())
+
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.score).toEqual(0)
+  expect(result.current.annoucement).toEqual(undefined)
 })
 
-test('clear rows', () => {
-  const initial = [
-    [null, null, null, TetrisBlock.S, null],
-    [null, null, null, TetrisBlock.S, TetrisBlock.S],
-    [TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, TetrisBlock.I, TetrisBlock.S],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-  ]
-  const final = [
-    [null, null, null, null, null],
-    [null, null, null, TetrisBlock.S, null],
-    [null, null, null, TetrisBlock.S, TetrisBlock.S],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
-    [null, null, null, TetrisBlock.O, TetrisBlock.O],
+test('rotate i off-center', async () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+      [
+        null,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+        TetrisBlock.O,
+      ],
+    ],
+    rotation: Direction.UP,
+    block: TetrisBlock.I,
+    x: 1,
+    y: 0,
+    next: helperMod.randomBag(),
+    width,
+    height,
+    score: 0,
+    rows: 100,
+  })
+
+  const tiles = [
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      TetrisBlock.I,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      null,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
+    [
+      TetrisBlock.I,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      null,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+      TetrisBlock.O,
+    ],
   ]
 
-  const result = helperMod.clearRows(initial)
-  expect(result.tiles).toStrictEqual(final)
-  expect(result.rowsCleared).toStrictEqual(1)
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.rotate())
+
+  await waitFor(() => {
+    expect(result.current.next.length).toEqual(6)
+  })
+
+  expect(result.current.visibleTiles[2]).toStrictEqual(tiles[2])
+  expect(result.current.visibleTiles[3]).toStrictEqual(tiles[3])
+  expect(result.current.visibleTiles[4]).toStrictEqual(tiles[4])
+  expect(result.current.score).toEqual(300 * 10)
+  expect(result.current.annoucement).toEqual('Double')
+
+  await waitFor(
+    () => {
+      expect(result.current.annoucement).toBeUndefined()
+    },
+    { timeout: 2000 },
+  )
+})
+
+test('rotate t', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+    ],
+    rotation: Direction.UP,
+    block: TetrisBlock.T,
+    x: 4,
+    y: 1,
+    next: [
+      TetrisBlock.I,
+      TetrisBlock.J,
+      TetrisBlock.L,
+      TetrisBlock.O,
+      TetrisBlock.S,
+      TetrisBlock.Z,
+    ],
+    width,
+    height,
+    score: 0,
+    rows: 100,
+  })
+
+  const tiles = [
+    [null, null, null, null, TetrisBlock.T, null, null, null, null, null],
+    [
+      null,
+      null,
+      null,
+      null,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, TetrisBlock.T, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.rotate())
+
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.score).toEqual(0)
+  expect(result.current.annoucement).toEqual(undefined)
+})
+
+test('t-spin single', async () => {
+  const width = 10
+  const height = 4
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [
+        null,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        null,
+        null,
+        null,
+        TetrisBlock.I,
+        null,
+        null,
+        null,
+      ],
+      [
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+      ],
+    ],
+    rotation: Direction.RIGHT,
+    block: TetrisBlock.T,
+    x: 4,
+    y: 2,
+    next: helperMod.randomBag(),
+    width,
+    height,
+    score: 0,
+    rows: 100,
+  })
+
+  const tiles = [
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.T,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+    ],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.rotate())
+
+  await waitFor(() => {
+    expect(result.current.next.length).toEqual(6)
+  })
+
+  expect(result.current.visibleTiles[2]).toStrictEqual(tiles[2])
+  expect(result.current.visibleTiles[3]).toStrictEqual(tiles[3])
+  expect(result.current.score).toEqual(800 * 10)
+  expect(result.current.annoucement).toEqual('T-Spin Single')
+})
+
+test('t-spin double off-center', async () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [
+        TetrisBlock.I,
+        TetrisBlock.I,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [TetrisBlock.I, null, null, null, null, null, null, null, null, null],
+      [
+        TetrisBlock.I,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+      ],
+      [
+        TetrisBlock.I,
+        null,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+      ],
+      [
+        TetrisBlock.I,
+        null,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+      ],
+    ],
+    rotation: Direction.UP,
+    block: TetrisBlock.T,
+    x: 2,
+    y: 1,
+    next: helperMod.randomBag(),
+    width,
+    height,
+    score: 0,
+    rows: 107,
+  })
+
+  const tiles = [
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [TetrisBlock.I, null, null, null, null, null, null, null, null, null],
+    [
+      TetrisBlock.I,
+      TetrisBlock.T,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+    ],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.rotate())
+
+  await waitFor(() => {
+    expect(result.current.next.length).toEqual(6)
+  })
+
+  expect(result.current.visibleTiles[2]).toStrictEqual(tiles[2])
+  expect(result.current.visibleTiles[3]).toStrictEqual(tiles[3])
+  expect(result.current.visibleTiles[4]).toStrictEqual(tiles[4])
+  expect(result.current.score).toEqual(1200 * 10)
+  expect(result.current.annoucement).toEqual('T-Spin Double')
+})
+
+test('mini t-spin single', async () => {
+  const width = 10
+  const height = 4
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, TetrisBlock.I],
+      [
+        null,
+        null,
+        null,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        null,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+      ],
+      [
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        TetrisBlock.I,
+        null,
+        null,
+        null,
+        TetrisBlock.I,
+        TetrisBlock.I,
+      ],
+    ],
+    rotation: Direction.LEFT,
+    block: TetrisBlock.T,
+    x: 7,
+    y: 2,
+    next: helperMod.randomBag(),
+    width,
+    height,
+    score: 0,
+    rows: 100,
+  })
+
+  const tiles = [
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, TetrisBlock.I],
+    [
+      null,
+      null,
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.T,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+    ],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.rotate())
+
+  await waitFor(() => {
+    expect(result.current.next.length).toEqual(6)
+  })
+
+  expect(result.current.visibleTiles[2]).toStrictEqual(tiles[2])
+  expect(result.current.visibleTiles[3]).toStrictEqual(tiles[3])
+  expect(result.current.score).toEqual(200 * 10)
+  expect(result.current.annoucement).toEqual('Mini T-Spin Single')
+})
+
+test('hard down', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+    ],
+    rotation: Direction.UP,
+    block: TetrisBlock.Z,
+    x: 4,
+    y: 0,
+    hold: TetrisBlock.L,
+    next: [TetrisBlock.I, TetrisBlock.J, TetrisBlock.O],
+    width,
+    height,
+    score: 0,
+    rows: 99,
+  })
+
+  const tiles = [
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+    ],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.hardDown())
+
+  expect(result.current.score).toStrictEqual(2 * 4)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+  expect(result.current.next.length).toEqual(9)
+})
+
+test('soft down', async () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy.mockReturnValue({
+    tiles: [
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null, null, null],
+    ],
+    rotation: Direction.UP,
+    block: TetrisBlock.Z,
+    x: 4,
+    y: 0,
+    hold: TetrisBlock.L,
+    next: [TetrisBlock.I, TetrisBlock.J, TetrisBlock.O, TetrisBlock.S],
+    width,
+    height,
+    score: 0,
+    rows: 99,
+  })
+
+  const tiles = [
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      TetrisBlock.Z,
+      TetrisBlock.Z,
+      null,
+      null,
+      null,
+      null,
+    ],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.setSoftDown(true))
+
+  await waitFor(() => {
+    expect(result.current.visibleTiles[2]).toEqual(tiles[3])
+  })
+
+  act(() => result.current.setSoftDown(false))
+
+  await waitFor(() => {
+    expect(result.current.next).toEqual([
+      TetrisBlock.J,
+      TetrisBlock.O,
+      TetrisBlock.S,
+    ])
+  })
+
+  expect(result.current.score).toStrictEqual(3)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+})
+
+test('restart', () => {
+  const width = 10
+  const height = 5
+
+  const initSpy = vi.spyOn(helperMod, 'initState')
+  initSpy
+    .mockReturnValue({
+      tiles: [
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+      ],
+      rotation: Direction.UP,
+      block: TetrisBlock.I,
+      x: width / 2 - 1,
+      y: 0,
+      next: helperMod.randomBag(),
+      width,
+      height,
+      score: 0,
+      rows: 0,
+    })
+    .mockReturnValueOnce({
+      tiles: [
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [
+          null,
+          null,
+          null,
+          TetrisBlock.Z,
+          TetrisBlock.Z,
+          null,
+          null,
+          TetrisBlock.T,
+          null,
+          null,
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          TetrisBlock.Z,
+          TetrisBlock.Z,
+          TetrisBlock.T,
+          TetrisBlock.T,
+          TetrisBlock.T,
+          null,
+        ],
+      ],
+      rotation: Direction.UP,
+      block: TetrisBlock.Z,
+      x: 4,
+      y: 0,
+      hold: TetrisBlock.L,
+      next: [TetrisBlock.I, TetrisBlock.J, TetrisBlock.O, TetrisBlock.S],
+      width,
+      height,
+      score: 28,
+      rows: 99,
+    })
+
+  const tiles = [
+    [
+      null,
+      null,
+      null,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      TetrisBlock.I,
+      null,
+      null,
+      null,
+    ],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null, null, null],
+  ]
+
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.restart())
+
+  expect(result.current.held).toBeUndefined()
+  expect(result.current.level).toEqual(0)
+  expect(result.current.score).toEqual(0)
+  expect(result.current.visibleTiles).toStrictEqual(tiles)
+})
+
+test('toggle paused', () => {
+  const width = 10
+  const height = 20
+  const { result } = renderHook(() => useTetris({ width, height }))
+
+  act(() => result.current.togglePause())
+
+  expect(result.current.paused).toBeTruthy()
+
+  act(() => result.current.togglePause())
+
+  expect(result.current.paused).toBeFalsy()
 })

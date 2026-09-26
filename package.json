@@ -9,8 +9,8 @@
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
-    "format": "prettier *",
-    "check": "prettier --write . && eslint --fix"
+    "format": "prettier --check .",
+    "fix": "prettier --write . && eslint --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
