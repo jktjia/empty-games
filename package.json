@@ -60,6 +60,6 @@
     "typescript": "^6.0.2",
     "vitest": "^5.0.2",
     "vitest-localstorage-mock": "^0.1.2",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^6.2.2"
   }
 }
